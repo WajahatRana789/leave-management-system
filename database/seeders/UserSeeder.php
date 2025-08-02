@@ -34,22 +34,20 @@ class UserSeeder extends Seeder
             Shift::where('id', $i + 1)->update(['manager_id' => $user->id]);
         }
 
-        // Employees assigned to different shifts
-        $employees = [
-            ['name' => 'Employee A', 'email' => 'employee.a@example.com', 'shift_id' => 1],
-            ['name' => 'Employee B', 'email' => 'employee.b@example.com', 'shift_id' => 2],
-            ['name' => 'Employee C', 'email' => 'employee.c@example.com', 'shift_id' => 3],
-        ];
+        // Generate 100 employees distributed over 3 shifts
 
-        foreach ($employees as $emp) {
+        for ($i = 1; $i <= 1000; $i++) {
+            $shiftId = (($i - 1) % 3) + 1; // Cycle through shift_id 1, 2, 3
+
             User::create([
-                'name' => $emp['name'],
-                'email' => $emp['email'],
+                'name' => "Employee $i",
+                'email' => "employee$i@example.com",
                 'role' => 'employee',
-                'shift_id' => $emp['shift_id'],
-                'password' => bcrypt('password')
+                'shift_id' => $shiftId,
+                'password' => bcrypt('password'),
             ]);
         }
+
 
         // Admin
         User::create([
