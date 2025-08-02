@@ -18,7 +18,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->enum('role', ['employee', 'manager', 'admin'])->default('employee');
-            $table->foreignId('shift_id')->nullable()->constrained()->nullOnDelete();
+            $table->unsignedBigInteger('shift_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
