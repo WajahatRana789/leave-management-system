@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -29,5 +30,40 @@ class UserController extends Controller
         $users = $query->paginate($request->per_page ?? 15);
 
         return inertia('users/index', ['users' => $users]);
+    }
+
+    public function create()
+    {
+        return inertia('users/create', [
+            'shifts' => Shift::select('id', 'name')->get(),
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'code' => 'required|string|max:10|unique:users,code',
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:6',
+            'role' => 'required|in:employee,manager,admin',
+            'shift_id' => 'nullable|exists:shifts,id',
+        ]);
+
+        // Additional validation for roles
+        if ($validated['role'] !== 'admin' && !$validated['shift_id']) {
+            return redirect()->back()->withErrors(['shift_id' => 'Shift is required for employees.']);
+        }
+
+        User::create([
+            'code' => $validated['code'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => bcrypt($validated['password']),
+            'role' => $validated['role'],
+            'shift_id' => $validated['shift_id'],
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'User created successfully!');
     }
 }

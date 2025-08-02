@@ -1,6 +1,7 @@
+import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -59,9 +60,9 @@ export default function UsersPage({ users }: UsersProps) {
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Users</h1>
-                    {/* <Button asChild>
+                    <Button asChild>
                         <Link href={route('users.create')}>Create User</Link>
-                    </Button> */}
+                    </Button>
                 </div>
 
                 <div className="mt-4">
