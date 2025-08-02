@@ -92,15 +92,71 @@ export default function UsersPage({ users }: UsersProps) {
                         </table>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-1">
-                        {users.links.map((link, i) => (
-                            <button
-                                key={i}
-                                className={`rounded border px-3 py-1 text-sm ${link.active ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'}`}
-                                dangerouslySetInnerHTML={{ __html: link.label }}
-                                onClick={() => goToPage(link.url)}
-                            />
-                        ))}
+                    <div className="mt-4 flex flex-wrap items-center gap-1">
+                        {/* First */}
+                        <button
+                            onClick={() => goToPage(users.current_page > 1 ? users.links[1].url : null)}
+                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                            disabled={users.current_page === 1}
+                        >
+                            First
+                        </button>
+
+                        {/* Prev */}
+                        <button
+                            onClick={() => goToPage(users.current_page > 1 ? users.links[users.current_page - 1].url : null)}
+                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                            disabled={users.current_page === 1}
+                        >
+                            Prev
+                        </button>
+
+                        {/* Numbered pages with ellipsis */}
+                        {Array.from({ length: users.last_page }, (_, i) => i + 1)
+                            .filter((page) => page === 1 || page === users.last_page || Math.abs(page - users.current_page) <= 1)
+                            .reduce<number[]>((acc, page, idx, arr) => {
+                                if (idx > 0 && page - arr[idx - 1] > 1) acc.push(-1); // use -1 as marker for ellipsis
+                                acc.push(page);
+                                return acc;
+                            }, [])
+                            .map((page, i) =>
+                                page === -1 ? (
+                                    <span key={i} className="px-2 text-gray-500">
+                                        …
+                                    </span>
+                                ) : (
+                                    <button
+                                        key={i}
+                                        onClick={() => goToPage(users.links.find((l) => l.label == String(page))?.url || null)}
+                                        className={`rounded border px-3 py-1 text-sm ${
+                                            users.current_page === page ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'
+                                        }`}
+                                    >
+                                        {page}
+                                    </button>
+                                ),
+                            )}
+
+                        {/* Next */}
+                        <button
+                            onClick={() => goToPage(users.current_page < users.last_page ? users.links[users.current_page + 1].url : null)}
+                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                            disabled={users.current_page === users.last_page}
+                        >
+                            Next
+                        </button>
+
+                        {/* Last */}
+                        <button
+                            onClick={() => {
+                                const lastPageLink = users.links.find((link) => link.label == String(users.last_page));
+                                goToPage(lastPageLink?.url || null);
+                            }}
+                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                            disabled={users.current_page === users.last_page}
+                        >
+                            Last
+                        </button>
                     </div>
                 </div>
             </div>
