@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { LayoutGrid } from 'lucide-react';
+import { CalendarCheck2, Clock, FilePlus2, LayoutGrid, PlusCircle, UserPlus, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -16,32 +16,32 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Users',
         href: '/users',
-        icon: LayoutGrid,
+        icon: Users2Icon,
     },
     {
         title: 'Create User',
         href: '/users/create',
-        icon: LayoutGrid,
+        icon: UserPlus,
     },
     {
         title: 'Shifts',
         href: '/shifts',
-        icon: LayoutGrid,
+        icon: Clock,
     },
     {
         title: 'Create Shift',
         href: '/shifts/create',
-        icon: LayoutGrid,
+        icon: PlusCircle,
     },
     {
         title: 'Leave Types',
         href: '/leave-types',
-        icon: LayoutGrid,
+        icon: CalendarCheck2,
     },
     {
         title: 'Create Leave Type',
         href: '/leave-types/create',
-        icon: LayoutGrid,
+        icon: FilePlus2,
     },
 ];
 
