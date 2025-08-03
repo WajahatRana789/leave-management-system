@@ -23,6 +23,16 @@ const mainNavItems: NavItem[] = [
         href: '/users/create',
         icon: LayoutGrid,
     },
+    {
+        title: 'Shifts',
+        href: '/shifts',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Create Shift',
+        href: '/shifts/create',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
