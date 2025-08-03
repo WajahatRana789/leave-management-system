@@ -41,6 +41,30 @@ const columns: ColumnDef<User>[] = [
         header: 'Shift',
         cell: ({ row }) => row.original.shift?.name || '-',
     },
+    {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+            const user = row.original;
+
+            const handleDelete = () => {
+                if (confirm(`Are you sure you want to delete user "${user.name}"?`)) {
+                    router.delete(route('users.destroy', user.id));
+                }
+            };
+
+            return (
+                <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" asChild>
+                        <Link href={route('users.edit', user.id)}>Edit</Link>
+                    </Button>
+                    <Button size="sm" variant="destructive" onClick={handleDelete}>
+                        Delete
+                    </Button>
+                </div>
+            );
+        },
+    },
 ];
 
 export default function UsersPage({ users }: UsersProps) {
