@@ -33,6 +33,16 @@ const mainNavItems: NavItem[] = [
         href: '/shifts/create',
         icon: LayoutGrid,
     },
+    {
+        title: 'Leave Types',
+        href: '/leave-types',
+        icon: LayoutGrid,
+    },
+    {
+        title: 'Create Leave Type',
+        href: '/leave-types/create',
+        icon: LayoutGrid,
+    },
 ];
 
 const footerNavItems: NavItem[] = [

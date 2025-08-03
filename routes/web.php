@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/shifts/{shift}/edit', [ShiftController::class, 'edit'])->name('shifts.edit');
     Route::put('/shifts/{shift}', [ShiftController::class, 'update'])->name('shifts.update');
     Route::delete('/shifts/{shift}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
+
+    Route::get('/leave-types', [LeaveTypeController::class, 'index'])->name('leave-types.index');
+    Route::get('/leave-types/create', [LeaveTypeController::class, 'create'])->name('leave-types.create');
+    Route::post('/leave-types', [LeaveTypeController::class, 'store'])->name('leave-types.store');
+    Route::get('/leave-types/{leaveType}/edit', [LeaveTypeController::class, 'edit'])->name('leave-types.edit');
+    Route::put('/leave-types/{leaveType}', [LeaveTypeController::class, 'update'])->name('leave-types.update');
+    Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class, 'destroy'])->name('leave-types.destroy');
 });
 
 require __DIR__ . '/settings.php';
