@@ -17,9 +17,9 @@ class UserSeeder extends Seeder
     {
         // Managers for each shift (assuming 3 shifts already seeded)
         $managers = [
-            ['name' => 'Manager Morning', 'email' => 'morning.manager@example.com', 'role' => 'manager'],
-            ['name' => 'Manager Evening', 'email' => 'evening.manager@example.com', 'role' => 'manager'],
-            ['name' => 'Manager Night', 'email' => 'night.manager@example.com', 'role' => 'manager'],
+            ['name' => 'Manager Morning', 'email' => 'morning.manager@example.com', 'role' => 'manager', 'shift_id' => 1],
+            ['name' => 'Manager Evening', 'email' => 'evening.manager@example.com', 'role' => 'manager', 'shift_id' => 2],
+            ['name' => 'Manager Night', 'email' => 'night.manager@example.com', 'role' => 'manager', 'shift_id' => 3],
         ];
 
         foreach ($managers as $i => $manager) {
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
 
         // Generate 100 employees distributed over 3 shifts
 
-        for ($i = 1; $i <= 10; $i++) {
+        for ($i = 1; $i <= 5; $i++) {
             $shiftId = (($i - 1) % 3) + 1; // Cycle through shift_id 1, 2, 3
 
             User::create([
