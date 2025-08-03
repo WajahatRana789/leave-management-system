@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(LeaveRequest::class);
     }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
 }

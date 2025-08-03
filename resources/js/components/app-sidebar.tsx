@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { CalendarCheck2, Clock, FilePlus2, LayoutGrid, PlusCircle, UserPlus, Users2Icon } from 'lucide-react';
+import { CalendarCheck2, Clock, FilePlus2, LayoutGrid, List, PlusCircle, Send, UserPlus, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -42,6 +42,16 @@ const mainNavItems: NavItem[] = [
         title: 'Create Leave Type',
         href: '/leave-types/create',
         icon: FilePlus2,
+    },
+    {
+        title: 'Leave Requests',
+        href: '/leave-requests',
+        icon: List,
+    },
+    {
+        title: 'Request For Leave',
+        href: '/leave-requests/create',
+        icon: Send,
     },
 ];
 
