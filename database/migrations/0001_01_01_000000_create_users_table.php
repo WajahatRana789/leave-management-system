@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['employee', 'manager', 'admin'])->default('employee');
+            $table->enum('role', ['employee', 'manager', 'admin', 'super_admin'])->default('employee');
             $table->unsignedBigInteger('shift_id')->nullable();
             $table->rememberToken();
             $table->timestamps();

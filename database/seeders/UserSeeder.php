@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
 
         // Generate 100 employees distributed over 3 shifts
 
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $shiftId = (($i - 1) % 3) + 1; // Cycle through shift_id 1, 2, 3
 
             User::create([
