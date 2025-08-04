@@ -40,21 +40,24 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
-const userNavItems: NavItem[] = [
+const commonUserNavItems: NavItem[] = [
     {
         title: 'My Leave Requests',
         href: '/my-leave-requests',
         icon: List,
     },
-    // {
-    //     title: 'Leave Requests',
-    //     href: '/leave-requests',
-    //     icon: List,
-    // },
     {
         title: 'Request For Leave',
         href: '/leave-requests/create',
         icon: Send,
+    },
+];
+
+const managerNavItems: NavItem[] = [
+    {
+        title: 'Employee Leave Requests',
+        href: '/employee-leave-requests',
+        icon: List,
     },
 ];
 
@@ -66,15 +69,26 @@ export function AppSidebar() {
     // Get the authenticated user from Inertia
     const { user } = usePage().props.auth;
 
-    // Combine nav items based on user role
+    // Determine role-specific items
+    const roleSpecificItems = [];
+
+    if (user.role === 'super_admin' || user.role === 'admin') {
+        roleSpecificItems.push(...adminNavItems);
+    }
+
+    if (user.role === 'manager') {
+        roleSpecificItems.push(...managerNavItems);
+    }
+
+    // Combine nav items
     const mainNavItems = [
         {
             title: 'Dashboard',
             href: '/dashboard',
             icon: LayoutGrid,
         },
-        ...(user.role === 'super_admin' ? adminNavItems : []),
-        ...userNavItems,
+        ...roleSpecificItems,
+        ...commonUserNavItems,
     ];
 
     return (

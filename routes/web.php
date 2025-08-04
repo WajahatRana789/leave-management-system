@@ -43,10 +43,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Regular user routes
     Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
     Route::get('/my-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave-requests.show');
-    // Route::get('/leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
+    Route::get('/employee-leave-requests', [LeaveRequestController::class, 'employeeLeaveRequests'])->name('leave-requests.employee.index');
     Route::get('/leave-requests/create', [LeaveRequestController::class, 'create'])->name('leave-requests.create');
     Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
     Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');
+
+    Route::post('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
+    Route::post('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
 });
 
 require __DIR__ . '/settings.php';

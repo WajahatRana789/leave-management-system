@@ -32,36 +32,46 @@ class LeaveRequestController extends Controller
         ]);
     }
 
-    // public function index()
-    // {
-    //     $user = auth()->user();
-    //     $query = LeaveRequest::with(['user', 'leaveType']);
+    public function employeeLeaveRequests()
+    {
+        $user = auth()->user();
 
-    //     if ($user->hasRole('admin') || $user->hasRole('super_admin')) {
-    //         // Admin sees all
-    //     } elseif ($user->hasRole('manager')) {
-    //         // Manager sees users assigned to the shift(s) they manage
-    //         $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+        // Employees cannot access this route at all
+        if ($user->role === 'employee') {
+            abort(403, 'Unauthorized action.');
+        }
 
-    //         $userIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
+        $query = LeaveRequest::with([
+            'user:id,name',
+            'leaveType:id,name',
+            'reviewedBy:id,name'
+        ]);
 
-    //         $query->whereIn('user_id', $userIds);
-    //     } else {
-    //         // Employee sees their own requests
-    //         $query->where('user_id', $user->id);
-    //     }
+        // Managers can only see their team's requests
+        if ($user->role === 'manager') {
+            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+            $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
 
-    //     $requests = $query->latest()->paginate(10)->withQueryString();
+            $query->whereIn('user_id', $teamUserIds);
+        }
 
-    //     return inertia('leave-requests/index', [
-    //         'requests' => $requests,
-    //         'canReview' => $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('super_admin'),
-    //         'authUser' => [
-    //             'id' => auth()->id(),
-    //             'role' => auth()->user()->role,
-    //         ],
-    //     ]);
-    // }
+        // Admins and super_admins can see all requests
+        // No additional query constraints needed
+
+        $requests = $query->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return inertia('leave-requests/employee-index', [
+            'requests' => $requests,
+            'canReview' => $user->role !== 'employee', // All non-employees can review
+            'authUser' => [
+                'id' => $user->id,
+                'role' => $user->role,
+                'name' => $user->name,
+            ],
+        ]);
+    }
 
     public function show(LeaveRequest $leaveRequest)
     {
@@ -183,5 +193,80 @@ class LeaveRequestController extends Controller
         }
 
         abort(403, 'You are not authorized to delete this leave request.');
+    }
+
+    public function approve(LeaveRequest $leaveRequest)
+    {
+        $user = auth()->user();
+
+        // Authorization - only managers/admins can approve, and only for their team if manager
+        if ($user->role === 'employee') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($user->role === 'manager') {
+            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+            $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
+
+            if (!in_array($leaveRequest->user_id, $teamUserIds->toArray())) {
+                abort(403, 'You can only approve leave requests for your team members.');
+            }
+        }
+
+        // Only allow approving pending requests
+        if ($leaveRequest->status !== 'pending') {
+            return back()->with('error', 'Only pending leave requests can be approved.');
+        }
+
+        $leaveRequest->update([
+            'status' => 'approved',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+        ]);
+
+        // Send approval notification (optional)
+        // Mail::to($leaveRequest->user->email)->send(new LeaveRequestApproved($leaveRequest));
+
+        return back()->with('success', 'Leave request has been approved.');
+    }
+
+    public function reject(Request $request, LeaveRequest $leaveRequest)
+    {
+        $request->validate([
+            'remarks' => 'required|string|max:1000',
+        ]);
+
+        $user = auth()->user();
+
+        // Authorization - same as approve
+        if ($user->role === 'employee') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($user->role === 'manager') {
+            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+            $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
+
+            if (!in_array($leaveRequest->user_id, $teamUserIds->toArray())) {
+                abort(403, 'You can only reject leave requests for your team members.');
+            }
+        }
+
+        // Only allow rejecting pending requests
+        if ($leaveRequest->status !== 'pending') {
+            return back()->with('error', 'Only pending leave requests can be rejected.');
+        }
+
+        $leaveRequest->update([
+            'status' => 'rejected',
+            'reviewed_by' => $user->id,
+            'reviewed_at' => now(),
+            'remarks' => $request->input('remarks')
+        ]);
+
+        // Send rejection notification (optional)
+        // Mail::to($leaveRequest->user->email)->send(new LeaveRequestRejected($leaveRequest));
+
+        return back()->with('success', 'Leave request has been rejected.');
     }
 }
