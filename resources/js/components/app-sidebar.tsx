@@ -76,7 +76,7 @@ export function AppSidebar() {
         roleSpecificItems.push(...adminNavItems);
     }
 
-    if (user.role === 'manager') {
+    if (['manager', 'super_admin', 'admin'].includes(user.role)) {
         roleSpecificItems.push(...managerNavItems);
     }
 
