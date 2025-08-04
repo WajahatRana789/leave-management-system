@@ -50,7 +50,7 @@ export default function MyRequestShow({ request, canDelete }: Props) {
     return (
         <AppLayout>
             <Head title="Leave Request Details" />
-            <div className="mx-auto max-w-4xl p-4">
+            <div className="p-4">
                 <div className="mb-6 flex items-center justify-between">
                     <Link href="/my-leave-requests" className="flex items-center text-sm text-gray-600 hover:text-gray-900">
                         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -69,7 +69,7 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                     <div className="border-b p-6">
                         <div className="flex items-start justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900">{request.leave_type.name} Leave</h2>
+                                <h2 className="text-2xl font-bold text-gray-900">{request.leave_type.name}</h2>
                                 <p className="mt-1 text-sm text-gray-500">Submitted on {new Date(request.created_at).toLocaleDateString()}</p>
                             </div>
                             <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusColors[request.status]}`}>
@@ -125,7 +125,7 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                     <FileText className="mr-2 h-5 w-5 text-gray-400" />
                                     Reason
                                 </h3>
-                                <p className="mt-2 rounded bg-gray-50 p-3 text-sm text-gray-700">{request.reason}</p>
+                                <p className="mt-2 rounded text-sm text-gray-700">{request.reason || 'No reason provided.'}</p>
                             </div>
 
                             {request.status !== 'pending' && (
