@@ -42,10 +42,15 @@ const adminNavItems: NavItem[] = [
 
 const userNavItems: NavItem[] = [
     {
-        title: 'Leave Requests',
-        href: '/leave-requests',
+        title: 'My Leave Requests',
+        href: '/my-leave-requests',
         icon: List,
     },
+    // {
+    //     title: 'Leave Requests',
+    //     href: '/leave-requests',
+    //     icon: List,
+    // },
     {
         title: 'Request For Leave',
         href: '/leave-requests/create',

@@ -1,25 +1,17 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
-import { Head, Link, router } from '@inertiajs/react';
-
-interface User {
-    id: number;
-    name: string;
-}
-
-interface LeaveType {
-    name: string;
-}
+import { Head, router } from '@inertiajs/react';
 
 interface LeaveRequest {
     id: number;
-    leave_type: LeaveType;
+    user: { name: string };
+    leave_type: { name: string };
     from_date: string;
     to_date: string;
     total_days: number;
     reason: string;
     status: 'pending' | 'approved' | 'rejected';
-    reviewed_by?: User;
+    reviewed_by?: { name: string };
     reviewed_at?: string;
     remarks?: string;
 }
@@ -33,74 +25,72 @@ interface Props {
         total: number;
         links: { url: string | null; label: string; active: boolean }[];
     };
+    canReview: boolean;
     authUser: {
         id: number;
         role: string;
     };
 }
 
-export default function MyLeaveRequests({ requests, authUser }: Props) {
-    const handleDelete = (id: number) => {
-        if (confirm('Are you sure you want to delete this leave request?')) {
-            router.delete(`/leave-requests/${id}`);
-        }
-    };
-
+export default function LeaveRequestIndex({ requests, canReview, authUser }: Props) {
     const goToPage = (url: string | null) => {
         if (url) router.visit(url);
     };
 
     return (
         <AppLayout>
-            <Head title="My Leave Requests" />
+            <Head title="Leave Requests" />
             <div className="p-4">
-                <h1 className="mb-4 text-2xl font-bold">My Leave Requests</h1>
-
+                <h1 className="mb-4 text-2xl font-bold">Leave Requests</h1>
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="min-w-full divide-y divide-gray-200 text-sm">
                         <thead className="bg-gray-100 text-left">
                             <tr>
+                                <th className="px-4 py-2">Employee</th>
                                 <th className="px-4 py-2">Type</th>
                                 <th className="px-4 py-2">From</th>
                                 <th className="px-4 py-2">To</th>
                                 <th className="px-4 py-2">Days</th>
-                                <th className="px-4 py-2">Reason</th>
                                 <th className="px-4 py-2">Status</th>
-                                <th className="px-4 py-2">Actions</th>
+                                {(canReview ||
+                                    requests.data.some(
+                                        (req) => req.status === 'pending' && req.user.id === authUser.id && authUser.role === 'employee',
+                                    )) && <th className="px-4 py-2">Actions</th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {requests.data.map((request) => (
-                                <tr key={request.id}>
-                                    <td className="px-4 py-2">{request.leave_type.name}</td>
-                                    <td className="px-4 py-2">{request.from_date}</td>
-                                    <td className="px-4 py-2">{request.to_date}</td>
-                                    <td className="px-4 py-2">{request.total_days}</td>
-                                    <td className="px-4 py-2">{request.reason}</td>
-                                    <td className="px-4 py-2 capitalize">
-                                        <span
-                                            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                                request.status === 'approved'
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : request.status === 'rejected'
-                                                      ? 'bg-red-100 text-red-800'
-                                                      : 'bg-yellow-100 text-yellow-800'
-                                            }`}
-                                        >
-                                            {request.status}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-2">
-                                        <div className="flex gap-2">
-                                            <Button size="sm" variant="outline" asChild>
-                                                <Link href={route('leave-requests.show', request.id)}>View</Link>
-                                            </Button>
-                                            {request.status === 'pending' && (
-                                                <Button size="sm" variant="destructive" onClick={() => handleDelete(request.id)}>
-                                                    Delete
+                            {requests.data.map((req) => (
+                                <tr key={req.id}>
+                                    <td className="px-4 py-2">{req.user.name}</td>
+                                    <td className="px-4 py-2">{req.leave_type.name}</td>
+                                    <td className="px-4 py-2">{req.from_date}</td>
+                                    <td className="px-4 py-2">{req.to_date}</td>
+                                    <td className="px-4 py-2">{req.total_days}</td>
+                                    <td className="px-4 py-2 capitalize">{req.status}</td>
+                                    <td className="space-x-2 px-4 py-2">
+                                        {canReview && (
+                                            <>
+                                                <Button size="sm" variant="outline">
+                                                    Approve
                                                 </Button>
-                                            )}
-                                        </div>
+                                                <Button size="sm" variant="destructive">
+                                                    Reject
+                                                </Button>
+                                            </>
+                                        )}
+                                        {req.status === 'pending' && req.user.id === authUser.id && authUser.role === 'employee' && (
+                                            <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={() => {
+                                                    if (confirm('Are you sure you want to delete this leave request?')) {
+                                                        router.delete(`/leave-requests/${req.id}`);
+                                                    }
+                                                }}
+                                            >
+                                                Delete
+                                            </Button>
+                                        )}
                                     </td>
                                 </tr>
                             ))}
@@ -108,7 +98,6 @@ export default function MyLeaveRequests({ requests, authUser }: Props) {
                     </table>
                 </div>
 
-                {/* Pagination */}
                 <div className="mt-4 flex flex-wrap items-center gap-1">
                     <button
                         onClick={() => goToPage(requests.links[1]?.url)}

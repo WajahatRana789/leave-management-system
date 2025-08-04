@@ -18,31 +18,67 @@ class LeaveRequestController extends Controller
     public function index()
     {
         $user = auth()->user();
-        $query = LeaveRequest::with(['user', 'leaveType']);
-
-        if ($user->hasRole('admin') || $user->hasRole('super_admin')) {
-            // Admin sees all
-        } elseif ($user->hasRole('manager')) {
-            // Manager sees users assigned to the shift(s) they manage
-            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
-
-            $userIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
-
-            $query->whereIn('user_id', $userIds);
-        } else {
-            // Employee sees their own requests
-            $query->where('user_id', $user->id);
-        }
-
-        $requests = $query->latest()->paginate(10)->withQueryString();
+        $requests = LeaveRequest::with(['leaveType', 'reviewedBy'])
+            ->where('user_id', $user->id)
+            ->latest()
+            ->paginate(10);
 
         return inertia('leave-requests/index', [
             'requests' => $requests,
-            'canReview' => $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('super_admin'),
             'authUser' => [
-                'id' => auth()->id(),
-                'role' => auth()->user()->role,
+                'id' => $user->id,
+                'role' => $user->role,
             ],
+        ]);
+    }
+
+    // public function index()
+    // {
+    //     $user = auth()->user();
+    //     $query = LeaveRequest::with(['user', 'leaveType']);
+
+    //     if ($user->hasRole('admin') || $user->hasRole('super_admin')) {
+    //         // Admin sees all
+    //     } elseif ($user->hasRole('manager')) {
+    //         // Manager sees users assigned to the shift(s) they manage
+    //         $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+
+    //         $userIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
+
+    //         $query->whereIn('user_id', $userIds);
+    //     } else {
+    //         // Employee sees their own requests
+    //         $query->where('user_id', $user->id);
+    //     }
+
+    //     $requests = $query->latest()->paginate(10)->withQueryString();
+
+    //     return inertia('leave-requests/index', [
+    //         'requests' => $requests,
+    //         'canReview' => $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('super_admin'),
+    //         'authUser' => [
+    //             'id' => auth()->id(),
+    //             'role' => auth()->user()->role,
+    //         ],
+    //     ]);
+    // }
+
+    public function show(LeaveRequest $leaveRequest)
+    {
+        // Authorization - user can only view their own requests
+        if (auth()->id() !== $leaveRequest->user_id) {
+            abort(403);
+        }
+
+        $leaveRequest->load([
+            'leaveType',
+            'reviewedBy:id,name',
+            'user:id,name'
+        ]);
+
+        return inertia('leave-requests/show', [
+            'request' => $leaveRequest,
+            'canDelete' => $leaveRequest->status === 'pending',
         ]);
     }
 
