@@ -3,16 +3,11 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { CalendarCheck2, Clock, FilePlus2, LayoutGrid, List, PlusCircle, Send, UserPlus, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
+const adminNavItems: NavItem[] = [
     {
         title: 'Users',
         href: '/users',
@@ -43,6 +38,9 @@ const mainNavItems: NavItem[] = [
         href: '/leave-types/create',
         icon: FilePlus2,
     },
+];
+
+const userNavItems: NavItem[] = [
     {
         title: 'Leave Requests',
         href: '/leave-requests',
@@ -56,19 +54,24 @@ const mainNavItems: NavItem[] = [
 ];
 
 const footerNavItems: NavItem[] = [
-    // {
-    //     title: 'Repository',
-    //     href: 'https://github.com/laravel/react-starter-kit',
-    //     icon: Folder,
-    // },
-    // {
-    //     title: 'Documentation',
-    //     href: 'https://laravel.com/docs/starter-kits#react',
-    //     icon: BookOpen,
-    // },
+    // ... your footer items
 ];
 
 export function AppSidebar() {
+    // Get the authenticated user from Inertia
+    const { user } = usePage().props.auth;
+
+    // Combine nav items based on user role
+    const mainNavItems = [
+        {
+            title: 'Dashboard',
+            href: '/dashboard',
+            icon: LayoutGrid,
+        },
+        ...(user.role === 'super_admin' ? adminNavItems : []),
+        ...userNavItems,
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
