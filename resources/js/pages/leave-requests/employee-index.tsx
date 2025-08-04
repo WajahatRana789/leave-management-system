@@ -8,6 +8,7 @@ export default function EmployeeLeaveRequests({ requests, authUser, canReview }:
     const [showModal, setShowModal] = useState(false);
     const [rejectingId, setRejectingId] = useState<number | null>(null);
     const [remarks, setRemarks] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
 
     const handleApprove = (id: number) => {
         if (confirm('Are you sure you want to approve this leave request?')) {
@@ -38,11 +39,54 @@ export default function EmployeeLeaveRequests({ requests, authUser, canReview }:
         setRemarks('');
     };
 
+    const handleStatusFilterChange = (status: 'pending' | 'approved' | 'rejected' | 'all') => {
+        setStatusFilter(status);
+        router.get(
+            route('leave-requests.employee.index'),
+            { status },
+            {
+                preserveState: true,
+                replace: true,
+            },
+        );
+    };
+
+    const filteredRequests = statusFilter === 'all' ? requests.data : requests.data.filter((request) => request.status === statusFilter);
+
     return (
         <AppLayout>
             <Head title="Employee Leave Requests" />
             <div className="p-4">
-                <h1 className="mb-4 text-2xl font-bold">{authUser.role === 'manager' ? 'Team Leave Requests' : 'Employee Leave Requests'}</h1>
+                <div className="mb-4 flex items-center justify-between">
+                    <h1 className="text-2xl font-bold">{authUser.role === 'manager' ? 'Team Leave Requests' : 'Employee Leave Requests'}</h1>
+
+                    <div className="flex gap-2">
+                        <Button
+                            variant={statusFilter === 'pending' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => handleStatusFilterChange('pending')}
+                        >
+                            Pending
+                        </Button>
+                        <Button
+                            variant={statusFilter === 'approved' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => handleStatusFilterChange('approved')}
+                        >
+                            Approved
+                        </Button>
+                        <Button
+                            variant={statusFilter === 'rejected' ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => handleStatusFilterChange('rejected')}
+                        >
+                            Rejected
+                        </Button>
+                        <Button variant={statusFilter === 'all' ? 'default' : 'outline'} size="sm" onClick={() => handleStatusFilterChange('all')}>
+                            All
+                        </Button>
+                    </div>
+                </div>
 
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="min-w-full divide-y divide-gray-200 text-sm">
@@ -59,7 +103,7 @@ export default function EmployeeLeaveRequests({ requests, authUser, canReview }:
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {requests.data.map((request) => (
+                            {filteredRequests.map((request) => (
                                 <tr key={request.id}>
                                     <td className="px-4 py-2">{request.user.name}</td>
                                     <td className="px-4 py-2">{request.leave_type.name}</td>
