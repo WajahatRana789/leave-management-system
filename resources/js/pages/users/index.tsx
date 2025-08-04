@@ -48,6 +48,11 @@ const columns: ColumnDef<User>[] = [
             const user = row.original;
 
             const handleDelete = () => {
+                if (user.role === 'super_admin') {
+                    alert('Cannot delete super admin user');
+                    return;
+                }
+
                 if (confirm(`Are you sure you want to delete user "${user.name}"?`)) {
                     router.delete(route('users.destroy', user.id));
                 }
@@ -58,7 +63,7 @@ const columns: ColumnDef<User>[] = [
                     <Button size="sm" variant="outline" asChild>
                         <Link href={route('users.edit', user.id)}>Edit</Link>
                     </Button>
-                    <Button size="sm" variant="destructive" onClick={handleDelete}>
+                    <Button size="sm" variant="destructive" onClick={handleDelete} disabled={user.role === 'super_admin'}>
                         Delete
                     </Button>
                 </div>
@@ -89,6 +94,8 @@ export default function UsersPage({ users }: UsersProps) {
                     </Button>
                 </div>
 
+                <div className="mt-2 text-sm text-gray-600">Total records: {users.total}</div>
+
                 <div className="mt-4">
                     <div className="overflow-x-auto rounded-xl border">
                         <table className="min-w-full text-sm">
@@ -117,71 +124,77 @@ export default function UsersPage({ users }: UsersProps) {
                         </table>
                     </div>
 
-                    <div className="mt-4 flex flex-wrap items-center gap-1">
-                        {/* First */}
-                        <button
-                            onClick={() => goToPage(users.current_page > 1 ? users.links[1].url : null)}
-                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
-                            disabled={users.current_page === 1}
-                        >
-                            First
-                        </button>
+                    <div className="mt-4 flex flex-wrap items-center justify-between">
+                        <div className="text-sm text-gray-600">
+                            Showing {users.data.length} of {users.total} records
+                        </div>
 
-                        {/* Prev */}
-                        <button
-                            onClick={() => goToPage(users.current_page > 1 ? users.links[users.current_page - 1].url : null)}
-                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
-                            disabled={users.current_page === 1}
-                        >
-                            Prev
-                        </button>
+                        <div className="flex flex-wrap items-center gap-1">
+                            {/* First */}
+                            <button
+                                onClick={() => goToPage(users.current_page > 1 ? users.links[1].url : null)}
+                                className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                                disabled={users.current_page === 1}
+                            >
+                                First
+                            </button>
 
-                        {/* Numbered pages with ellipsis */}
-                        {Array.from({ length: users.last_page }, (_, i) => i + 1)
-                            .filter((page) => page === 1 || page === users.last_page || Math.abs(page - users.current_page) <= 1)
-                            .reduce<number[]>((acc, page, idx, arr) => {
-                                if (idx > 0 && page - arr[idx - 1] > 1) acc.push(-1); // use -1 as marker for ellipsis
-                                acc.push(page);
-                                return acc;
-                            }, [])
-                            .map((page, i) =>
-                                page === -1 ? (
-                                    <span key={i} className="px-2 text-gray-500">
-                                        …
-                                    </span>
-                                ) : (
-                                    <button
-                                        key={i}
-                                        onClick={() => goToPage(users.links.find((l) => l.label == String(page))?.url || null)}
-                                        className={`rounded border px-3 py-1 text-sm ${
-                                            users.current_page === page ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'
-                                        }`}
-                                    >
-                                        {page}
-                                    </button>
-                                ),
-                            )}
+                            {/* Prev */}
+                            <button
+                                onClick={() => goToPage(users.current_page > 1 ? users.links[users.current_page - 1].url : null)}
+                                className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                                disabled={users.current_page === 1}
+                            >
+                                Prev
+                            </button>
 
-                        {/* Next */}
-                        <button
-                            onClick={() => goToPage(users.current_page < users.last_page ? users.links[users.current_page + 1].url : null)}
-                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
-                            disabled={users.current_page === users.last_page}
-                        >
-                            Next
-                        </button>
+                            {/* Numbered pages with ellipsis */}
+                            {Array.from({ length: users.last_page }, (_, i) => i + 1)
+                                .filter((page) => page === 1 || page === users.last_page || Math.abs(page - users.current_page) <= 1)
+                                .reduce<number[]>((acc, page, idx, arr) => {
+                                    if (idx > 0 && page - arr[idx - 1] > 1) acc.push(-1); // use -1 as marker for ellipsis
+                                    acc.push(page);
+                                    return acc;
+                                }, [])
+                                .map((page, i) =>
+                                    page === -1 ? (
+                                        <span key={i} className="px-2 text-gray-500">
+                                            …
+                                        </span>
+                                    ) : (
+                                        <button
+                                            key={i}
+                                            onClick={() => goToPage(users.links.find((l) => l.label == String(page))?.url || null)}
+                                            className={`rounded border px-3 py-1 text-sm ${
+                                                users.current_page === page ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ),
+                                )}
 
-                        {/* Last */}
-                        <button
-                            onClick={() => {
-                                const lastPageLink = users.links.find((link) => link.label == String(users.last_page));
-                                goToPage(lastPageLink?.url || null);
-                            }}
-                            className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
-                            disabled={users.current_page === users.last_page}
-                        >
-                            Last
-                        </button>
+                            {/* Next */}
+                            <button
+                                onClick={() => goToPage(users.current_page < users.last_page ? users.links[users.current_page + 1].url : null)}
+                                className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                                disabled={users.current_page === users.last_page}
+                            >
+                                Next
+                            </button>
+
+                            {/* Last */}
+                            <button
+                                onClick={() => {
+                                    const lastPageLink = users.links.find((link) => link.label == String(users.last_page));
+                                    goToPage(lastPageLink?.url || null);
+                                }}
+                                className="rounded border bg-white px-3 py-1 text-sm hover:bg-gray-100"
+                                disabled={users.current_page === users.last_page}
+                            >
+                                Last
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
