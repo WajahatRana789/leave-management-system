@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { Dialog } from '@headlessui/react';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, Check, Clock, FileText, User, X } from 'lucide-react';
+import { useState } from 'react';
 
 interface User {
     id: number;
@@ -40,16 +42,33 @@ interface Props {
 }
 
 export default function EmployeeRequestShow({ request, canReview, authUser }: Props) {
+    const [showModal, setShowModal] = useState(false);
+    const [remarks, setRemarks] = useState('');
+
     const handleApprove = () => {
         if (confirm('Are you sure you want to approve this leave request?')) {
             router.post(route('leave-requests.approve', request.id));
         }
     };
 
-    const handleReject = () => {
-        if (confirm('Are you sure you want to reject this leave request?')) {
-            router.post(route('leave-requests.reject', request.id));
+    const openRejectModal = () => {
+        setShowModal(true);
+    };
+
+    const submitRejection = () => {
+        if (!remarks.trim()) {
+            alert('Please enter remarks for rejection.');
+            return;
         }
+
+        router.post(route('leave-requests.reject', request.id), { remarks });
+        setShowModal(false);
+        setRemarks('');
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setRemarks('');
     };
 
     const statusColors = {
@@ -62,6 +81,30 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
         <AppLayout>
             <Head title="Leave Request Details" />
             <div className="p-4">
+                {/* Rejection Modal */}
+                <Dialog open={showModal} onClose={closeModal} className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+                    <div className="z-10 w-full max-w-md rounded-lg bg-white p-6">
+                        <Dialog.Title className="mb-2 text-lg font-bold">Reject Leave Request</Dialog.Title>
+                        <p className="mb-4 text-sm text-gray-600">Please provide remarks for rejecting {request.user.name}'s leave request:</p>
+                        <textarea
+                            className="w-full rounded border p-2 text-sm"
+                            rows={4}
+                            value={remarks}
+                            onChange={(e) => setRemarks(e.target.value)}
+                            placeholder="Enter rejection remarks..."
+                        />
+                        <div className="mt-4 flex justify-end gap-2">
+                            <Button variant="outline" onClick={closeModal}>
+                                Cancel
+                            </Button>
+                            <Button variant="destructive" onClick={submitRejection}>
+                                Confirm Reject
+                            </Button>
+                        </div>
+                    </div>
+                </Dialog>
+
                 <div className="mb-6 flex items-center justify-between">
                     <Link href={route('leave-requests.employee.index')} className="flex items-center text-sm text-gray-600 hover:text-gray-900">
                         <ArrowLeft className="mr-2 h-4 w-4" />
@@ -74,7 +117,7 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                 <Check className="mr-2 h-4 w-4" />
                                 Approve
                             </Button>
-                            <Button variant="destructive" onClick={handleReject}>
+                            <Button variant="destructive" onClick={openRejectModal}>
                                 <X className="mr-2 h-4 w-4" />
                                 Reject
                             </Button>
@@ -148,7 +191,7 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                     <FileText className="mr-2 h-5 w-5 text-gray-400" />
                                     Reason
                                 </h3>
-                                <p className="mt-2 rounded text-sm text-gray-700">{request.reason || 'No reason provided'}</p>
+                                <p className="mt-2 rounded bg-gray-50 p-3 text-sm text-gray-700">{request.reason || 'No reason provided'}</p>
                             </div>
 
                             {request.status !== 'pending' && (
@@ -171,7 +214,7 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                         {request.remarks && (
                                             <div className="flex flex-col">
                                                 <dt className="text-sm font-medium text-gray-500">Remarks</dt>
-                                                <dd className="mt-1 rounded text-sm text-gray-700">{request.remarks || 'No remarks provided'}</dd>
+                                                <dd className="mt-1 rounded bg-gray-50 p-2 text-sm text-gray-700">{request.remarks}</dd>
                                             </div>
                                         )}
                                     </dl>
