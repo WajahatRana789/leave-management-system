@@ -40,7 +40,7 @@ const adminNavItems: NavItem[] = [
     },
 ];
 
-const commonUserNavItems: NavItem[] = [
+const employeeNavItems: NavItem[] = [
     {
         title: 'My Leave Requests',
         href: '/my-leave-requests',
@@ -80,6 +80,9 @@ export function AppSidebar() {
         roleSpecificItems.push(...managerNavItems);
     }
 
+    // Only show employee nav items for non-admin users
+    const userSpecificItems = ['employee', 'manager'].includes(user.role) ? employeeNavItems : [];
+
     // Combine nav items
     const mainNavItems = [
         {
@@ -88,7 +91,7 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         ...roleSpecificItems,
-        ...commonUserNavItems,
+        ...userSpecificItems,
     ];
 
     return (
