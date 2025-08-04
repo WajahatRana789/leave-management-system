@@ -62,9 +62,6 @@ class LeaveRequestController extends Controller
         // Apply status filter if provided
         if (request()->has('status') && request('status') !== 'all') {
             $query->where('status', request('status'));
-        } else {
-            // Default to showing pending requests
-            $query->where('status', 'pending');
         }
 
         $requests = $query->latest()
