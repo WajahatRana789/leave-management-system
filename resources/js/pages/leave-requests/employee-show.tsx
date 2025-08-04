@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, CalendarDays, Clock, FileText, User, X } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Check, Clock, FileText, User, X } from 'lucide-react';
 
 interface User {
     id: number;
     name: string;
+    email: string;
 }
 
 interface LeaveType {
@@ -26,18 +27,28 @@ interface LeaveRequest {
     reviewed_at?: string;
     remarks?: string;
     created_at: string;
-    updated_at: string;
 }
 
 interface Props {
     request: LeaveRequest;
-    canDelete: boolean;
+    canReview: boolean;
+    authUser: {
+        id: number;
+        role: string;
+        name: string;
+    };
 }
 
-export default function MyRequestShow({ request, canDelete }: Props) {
-    const handleDelete = () => {
-        if (confirm('Are you sure you want to delete this leave request?')) {
-            router.delete(`/leave-requests/${request.id}`);
+export default function EmployeeRequestShow({ request, canReview, authUser }: Props) {
+    const handleApprove = () => {
+        if (confirm('Are you sure you want to approve this leave request?')) {
+            router.post(route('leave-requests.approve', request.id));
+        }
+    };
+
+    const handleReject = () => {
+        if (confirm('Are you sure you want to reject this leave request?')) {
+            router.post(route('leave-requests.reject', request.id));
         }
     };
 
@@ -52,16 +63,22 @@ export default function MyRequestShow({ request, canDelete }: Props) {
             <Head title="Leave Request Details" />
             <div className="p-4">
                 <div className="mb-6 flex items-center justify-between">
-                    <Link href="/my-leave-requests" className="flex items-center text-sm text-gray-600 hover:text-gray-900">
+                    <Link href={route('leave-requests.employee.index')} className="flex items-center text-sm text-gray-600 hover:text-gray-900">
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Back to My Requests
+                        Back to Employee Requests
                     </Link>
 
-                    {canDelete && (
-                        <Button variant="destructive" onClick={handleDelete} size="sm">
-                            <X className="mr-2 h-4 w-4" />
-                            Delete Request
-                        </Button>
+                    {canReview && request.status === 'pending' && (
+                        <div className="flex gap-2">
+                            <Button onClick={handleApprove}>
+                                <Check className="mr-2 h-4 w-4" />
+                                Approve
+                            </Button>
+                            <Button variant="destructive" onClick={handleReject}>
+                                <X className="mr-2 h-4 w-4" />
+                                Reject
+                            </Button>
+                        </div>
                     )}
                 </div>
 
@@ -69,7 +86,9 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                     <div className="border-b p-6">
                         <div className="flex items-start justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-900">{request.leave_type.name}</h2>
+                                <h2 className="text-2xl font-bold text-gray-900">
+                                    {request.user.name}'s {request.leave_type.name}
+                                </h2>
                                 <p className="mt-1 text-sm text-gray-500">Submitted on {new Date(request.created_at).toLocaleDateString()}</p>
                             </div>
                             <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusColors[request.status]}`}>
@@ -83,20 +102,20 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                             <div>
                                 <h3 className="flex items-center text-lg font-medium text-gray-900">
                                     <User className="mr-2 h-5 w-5 text-gray-400" />
-                                    Request Details
+                                    Employee Details
                                 </h3>
                                 <dl className="mt-2 space-y-3">
                                     <div className="flex justify-between">
-                                        <dt className="text-sm font-medium text-gray-500">Employee</dt>
+                                        <dt className="text-sm font-medium text-gray-500">Name</dt>
                                         <dd className="text-sm text-gray-900">{request.user.name}</dd>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <dt className="text-sm font-medium text-gray-500">Email</dt>
+                                        <dd className="text-sm text-gray-900">{request.user.email}</dd>
                                     </div>
                                     <div className="flex justify-between">
                                         <dt className="text-sm font-medium text-gray-500">Leave Type</dt>
                                         <dd className="text-sm text-gray-900">{request.leave_type.name}</dd>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <dt className="text-sm font-medium text-gray-500">Duration</dt>
-                                        <dd className="text-sm text-gray-900">{request.total_days} day(s)</dd>
                                     </div>
                                 </dl>
                             </div>
@@ -115,6 +134,10 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                         <dt className="text-sm font-medium text-gray-500">To</dt>
                                         <dd className="text-sm text-gray-900">{new Date(request.to_date).toLocaleDateString()}</dd>
                                     </div>
+                                    <div className="flex justify-between">
+                                        <dt className="text-sm font-medium text-gray-500">Total Days</dt>
+                                        <dd className="text-sm text-gray-900">{request.total_days}</dd>
+                                    </div>
                                 </dl>
                             </div>
                         </div>
@@ -125,7 +148,7 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                     <FileText className="mr-2 h-5 w-5 text-gray-400" />
                                     Reason
                                 </h3>
-                                <p className="mt-2 rounded text-sm text-gray-700">{request.reason || 'No reason provided.'}</p>
+                                <p className="mt-2 rounded text-sm text-gray-700">{request.reason || 'No reason provided'}</p>
                             </div>
 
                             {request.status !== 'pending' && (
@@ -135,10 +158,6 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                         Review Details
                                     </h3>
                                     <dl className="mt-2 space-y-3">
-                                        <div className="flex justify-between">
-                                            <dt className="text-sm font-medium text-gray-500">Status</dt>
-                                            <dd className="text-sm text-gray-900 capitalize">{request.status}</dd>
-                                        </div>
                                         <div className="flex justify-between">
                                             <dt className="text-sm font-medium text-gray-500">Reviewed By</dt>
                                             <dd className="text-sm text-gray-900">{request.reviewed_by?.name || 'N/A'}</dd>
@@ -152,7 +171,7 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                         {request.remarks && (
                                             <div className="flex flex-col">
                                                 <dt className="text-sm font-medium text-gray-500">Remarks</dt>
-                                                <dd className="mt-1 rounded text-sm text-gray-700">{request.remarks}</dd>
+                                                <dd className="mt-1 rounded text-sm text-gray-700">{request.remarks || 'No remarks provided'}</dd>
                                             </div>
                                         )}
                                     </dl>

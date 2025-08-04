@@ -44,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
     Route::get('/my-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave-requests.show');
     Route::get('/employee-leave-requests', [LeaveRequestController::class, 'employeeLeaveRequests'])->name('leave-requests.employee.index');
+    Route::get('/employee-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'employeeLeaveRequestShow'])->name('leave-requests.employee.show');
     Route::get('/leave-requests/create', [LeaveRequestController::class, 'create'])->name('leave-requests.create');
     Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
     Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');

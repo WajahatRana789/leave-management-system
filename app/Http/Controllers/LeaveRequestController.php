@@ -92,6 +92,42 @@ class LeaveRequestController extends Controller
         ]);
     }
 
+    public function employeeLeaveRequestShow(LeaveRequest $leaveRequest)
+    {
+        $user = auth()->user();
+
+        // Authorization - employees can't access this
+        if ($user->role === 'employee') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Managers can only view their team's requests
+        if ($user->role === 'manager') {
+            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+            $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
+
+            if (!in_array($leaveRequest->user_id, $teamUserIds->toArray())) {
+                abort(403, 'You can only view leave requests for your team members.');
+            }
+        }
+
+        $leaveRequest->load([
+            'user',
+            'leaveType',
+            'reviewedBy'
+        ]);
+
+        return inertia('leave-requests/employee-show', [
+            'request' => $leaveRequest,
+            'canReview' => $user->role !== 'employee',
+            'authUser' => [
+                'id' => $user->id,
+                'role' => $user->role,
+                'name' => $user->name,
+            ],
+        ]);
+    }
+
     public function create()
     {
         $user = Auth::user();

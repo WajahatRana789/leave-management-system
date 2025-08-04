@@ -83,7 +83,7 @@ export default function EmployeeLeaveRequests({ requests, authUser, canReview }:
                                     <td className="px-4 py-2">
                                         <div className="flex gap-2">
                                             <Button size="sm" variant="outline" asChild>
-                                                <Link href={route('leave-requests.show', request.id)}>View</Link>
+                                                <Link href={route('leave-requests.employee.show', request.id)}>View</Link>
                                             </Button>
                                             {canReview && request.status === 'pending' && (
                                                 <>
