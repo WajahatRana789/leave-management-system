@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { CalendarDays, Clock, FileText, PlusCircle, Users } from 'lucide-react';
+import { Clock, FileText, PlusCircle, Users } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -18,8 +18,6 @@ export default function EmployeeDashboard() {
         shiftInfo: ShiftInfo | null;
     };
 
-    console.log(recentLeaves);
-
     const pendingRequests = recentLeaves.filter((r) => r.status === 'pending');
     const oldestPending = pendingRequests.length ? Math.min(...pendingRequests.map((r) => new Date(r.from_date).getTime())) : null;
 
@@ -32,7 +30,38 @@ export default function EmployeeDashboard() {
             <Head title="Employee Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
-                    <h1 className="text-2xl font-semibold">Welcome to Your Dashboard</h1>
+                    <div className="flex items-center justify-between">
+                        <h1 className="text-2xl font-bold">Employee Dashboard</h1>
+                        <div className="flex flex-wrap gap-4">
+                            <Link
+                                href="/leave-requests/create"
+                                className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-3 py-2 text-white shadow hover:bg-green-700"
+                            >
+                                <PlusCircle className="h-4 w-4" />
+                                Request Leave
+                            </Link>
+                            <Link
+                                href="/my-leave-requests"
+                                className="flex items-center justify-center rounded-xl bg-primary px-4 py-2 font-semibold text-white shadow transition hover:bg-primary/90"
+                            >
+                                View My Requests
+                            </Link>
+                            {/* <Link
+                                href="/calendar"
+                                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-white shadow hover:bg-blue-700"
+                            >
+                                <CalendarDays className="h-4 w-4" />
+                                View Calendar
+                            </Link> */}
+                            {/* <a
+                                href="/leave-summary/download"
+                                className="inline-flex items-center gap-2 rounded-xl bg-gray-600 px-3 py-2 text-white shadow hover:bg-gray-700"
+                            >
+                                <FileText className="h-4 w-4" />
+                                Download Summary
+                            </a> */}
+                        </div>
+                    </div>
 
                     {/* 1. Leave Balance Summary */}
                     <section className="space-y-2">
@@ -42,7 +71,7 @@ export default function EmployeeDashboard() {
                                 const percent = leave.default_days ? (leave.remaining_days / leave.default_days) * 100 : 0;
                                 return (
                                     <div key={leave.id} className="rounded-lg border bg-white p-4 shadow">
-                                        <p className="mb-1 text-sm text-gray-600">{leave.name} Leave</p>
+                                        <p className="mb-1 text-sm text-gray-600">{leave.name}</p>
                                         <div className="mb-1 flex items-center justify-between">
                                             <span className="text-xl font-bold text-green-700">
                                                 {leave.remaining_days}/{leave.default_days} days
@@ -77,12 +106,6 @@ export default function EmployeeDashboard() {
                                     </p>
                                 </div>
                             </div>
-                            <Link
-                                href="/my-leave-requests"
-                                className="flex items-center justify-center rounded-xl bg-primary px-4 py-2 font-semibold text-white shadow transition hover:bg-primary/90"
-                            >
-                                View My Requests
-                            </Link>
                         </div>
                     </section>
 
@@ -159,34 +182,6 @@ export default function EmployeeDashboard() {
                             </div>
                         </section>
                     )}
-
-                    {/* 6. Quick Actions */}
-                    <section>
-                        <h2 className="mb-2 text-lg font-semibold">Quick Actions</h2>
-                        <div className="flex flex-wrap gap-4">
-                            <Link
-                                href="/leave-requests/create"
-                                className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700"
-                            >
-                                <PlusCircle className="h-4 w-4" />
-                                Request Leave
-                            </Link>
-                            <Link
-                                href="/calendar"
-                                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700"
-                            >
-                                <CalendarDays className="h-4 w-4" />
-                                View Calendar
-                            </Link>
-                            <a
-                                href="/leave-summary/download"
-                                className="inline-flex items-center gap-2 rounded-xl bg-gray-600 px-4 py-2 text-white shadow hover:bg-gray-700"
-                            >
-                                <FileText className="h-4 w-4" />
-                                Download Summary
-                            </a>
-                        </div>
-                    </section>
                 </div>
             </div>
         </AppLayout>
