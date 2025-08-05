@@ -15,7 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Dashboard() {
     const { user } = usePage().props.auth;
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />

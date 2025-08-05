@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -12,9 +15,23 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+
+    Route::get('dashboard', function (Request $request) {
+        $user = Auth::user();
+        return match ($user->role) {
+            'employee' => redirect()->route('employee.dashboard'),
+            'manager' => redirect()->route('manager.dashboard'),
+            'admin' => redirect()->route('admin.dashboard'),
+            'super_admin' => redirect()->route('superadmin.dashboard'),
+            default => abort(403, 'Unauthorized'),
+        };
     })->name('dashboard');
+
+    // Dashboard routes
+    Route::get('/dashboard/employee', [DashboardController::class, 'employeeDashboard'])->name('employee.dashboard');
+    // Route::get('/dashboard/manager', [DashboardController::class, 'managerDashboard'])->name('manager.dashboard');
+    // Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
+    // Route::get('/dashboard/superadmin', [DashboardController::class, 'superAdminDashboard'])->name('superadmin.dashboard');
 
     // Super Admin only routes
     Route::middleware(['super_admin'])->group(function () {
