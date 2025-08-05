@@ -4,8 +4,10 @@ namespace Database\Seeders;
 
 use App\Models\Shift;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -37,7 +39,7 @@ class UserSeeder extends Seeder
 
         // Generate 100 employees distributed over 3 shifts
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 100; $i++) {
             $shiftId = (($i - 1) % 3) + 1; // Cycle through shift_id 1, 2, 3
 
             User::create([
@@ -59,5 +61,34 @@ class UserSeeder extends Seeder
             'role' => 'admin',
             'password' => bcrypt('password')
         ]);
+
+
+        // Insert leave requests for morning shift users (shift_id = 1)
+        $morningShiftUsers = User::where('shift_id', 1)->get();
+
+        foreach ($morningShiftUsers as $user) {
+            // Random start day between today and 25th of this month
+            $startDate = Carbon::now()->startOfMonth()->addDays(rand(0, 25));
+
+            // Random leave duration: 1 to 4 days
+            $duration = rand(1, 4);
+            $endDate = (clone $startDate)->addDays($duration - 1);
+
+            // Ensure leave stays within the same month
+            if ($endDate->month !== $startDate->month) {
+                $endDate = $startDate->copy()->endOfMonth();
+                $duration = $startDate->diffInDays($endDate) + 1;
+            }
+
+            $user->leaveRequests()->create([
+                'user_id' => $user->id,
+                'leave_type_id' => rand(1, 2),
+                'from_date' => $startDate->toDateString(),
+                'to_date' => $endDate->toDateString(),
+                'total_days' => $duration,
+                'reason' => '',
+                'status' => Arr::random(['pending', 'approved', 'rejected']),
+            ]);
+        }
     }
 }

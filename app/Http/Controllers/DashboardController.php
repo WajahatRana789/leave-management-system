@@ -54,15 +54,42 @@ class DashboardController extends Controller
         // Shift and manager info
         $shift = Shift::with('manager')->find($user->shift_id);
 
+        // Personal leaves for calendar
         $calendarLeaves = LeaveRequest::with('leaveType')
             ->where('user_id', $user->id)
             ->get();
+
+        // Team leaves for calendar (same shift, excluding current user)
+        $teamCalendarLeaves = LeaveRequest::with(['user', 'leaveType'])
+            ->whereHas('user', fn($q) => $q->where('shift_id', $user->shift_id)->where('id', '!=', $user->id))
+            ->whereIn('status', ['approved', 'pending']) // Only show approved/pending
+            ->get()
+            ->map(function ($leave) {
+                return [
+                    'id' => $leave->id,
+                    'user_id' => $leave->user_id,
+                    'user' => ['name' => $leave->user->name],
+                    'leave_type_id' => $leave->leave_type_id,
+                    'leave_type' => ['name' => $leave->leaveType->name],
+                    'from_date' => $leave->from_date,
+                    'to_date' => $leave->to_date,
+                    'total_days' => $leave->total_days,
+                    'reason' => $leave->reason,
+                    'status' => $leave->status,
+                    'reviewed_by' => $leave->reviewed_by,
+                    'reviewed_at' => $leave->reviewed_at,
+                    'remarks' => $leave->remarks,
+                    'created_at' => $leave->created_at,
+                    'updated_at' => $leave->updated_at,
+                ];
+            });
 
         return Inertia::render('dashboards/employee-dashboard', [
             'leaveBalances' => $leaveBalances,
             'recentLeaves' => $recentLeaves,
             'teamOnLeaveToday' => $teamOnLeaveToday,
             'calendarLeaves' => $calendarLeaves,
+            'teamCalendarLeaves' => $teamCalendarLeaves,
             'shiftInfo' => $shift ? [
                 'name' => $shift->name,
                 'manager' => [

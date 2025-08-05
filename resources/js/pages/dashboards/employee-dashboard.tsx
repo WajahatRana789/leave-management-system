@@ -13,12 +13,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EmployeeDashboard() {
-    const { leaveBalances, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves } = usePage().props as {
+    const { leaveBalances, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves, teamCalendarLeaves } = usePage().props as {
         leaveBalances: LeaveBalance[];
         recentLeaves: LeaveRequest[];
         teamOnLeaveToday: TeamMemberOnLeave[];
         shiftInfo: ShiftInfo | null;
         calendarLeaves: LeaveRequest[];
+        teamCalendarLeaves: LeaveRequest[];
     };
 
     const [showCalendar, setShowCalendar] = useState(false);
@@ -62,7 +63,7 @@ export default function EmployeeDashboard() {
 
                     {showCalendar && (
                         <div>
-                            <EmployeeLeaveCalendar leaves={calendarLeaves} />
+                            <EmployeeLeaveCalendar leaves={calendarLeaves} teamLeaves={teamCalendarLeaves} />
                         </div>
                     )}
 
