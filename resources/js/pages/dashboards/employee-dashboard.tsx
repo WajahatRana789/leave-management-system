@@ -1,7 +1,9 @@
+import EmployeeLeaveCalendar from '@/components/EmployeeLeaveCalendar';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { LeaveBalance, LeaveRequest, ShiftInfo, TeamMemberOnLeave, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Clock, FileText, PlusCircle, Users } from 'lucide-react';
+import { CalendarDays, Clock, FileText, PlusCircle, Users } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -11,13 +13,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EmployeeDashboard() {
-    const { leaveBalances, recentLeaves, teamOnLeaveToday, shiftInfo } = usePage().props as {
+    const { leaveBalances, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves } = usePage().props as {
         leaveBalances: LeaveBalance[];
         recentLeaves: LeaveRequest[];
         teamOnLeaveToday: TeamMemberOnLeave[];
         shiftInfo: ShiftInfo | null;
+        calendarLeaves: LeaveRequest[];
     };
 
+    const [showCalendar, setShowCalendar] = useState(false);
     const pendingRequests = recentLeaves.filter((r) => r.status === 'pending');
     const oldestPending = pendingRequests.length ? Math.min(...pendingRequests.map((r) => new Date(r.from_date).getTime())) : null;
 
@@ -42,28 +46,26 @@ export default function EmployeeDashboard() {
                             </Link>
                             <Link
                                 href="/my-leave-requests"
-                                className="flex items-center justify-center rounded-xl bg-primary px-4 py-2 font-semibold text-white shadow transition hover:bg-primary/90"
+                                className="flex items-center justify-center rounded-xl bg-primary px-3 py-2 text-white shadow transition hover:bg-primary/90"
                             >
                                 View My Requests
                             </Link>
-                            {/* <Link
-                                href="/calendar"
+                            <button
+                                onClick={() => setShowCalendar(!showCalendar)}
                                 className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-3 py-2 text-white shadow hover:bg-blue-700"
                             >
                                 <CalendarDays className="h-4 w-4" />
-                                View Calendar
-                            </Link> */}
-                            {/* <a
-                                href="/leave-summary/download"
-                                className="inline-flex items-center gap-2 rounded-xl bg-gray-600 px-3 py-2 text-white shadow hover:bg-gray-700"
-                            >
-                                <FileText className="h-4 w-4" />
-                                Download Summary
-                            </a> */}
+                                {showCalendar ? 'Hide Calendar View' : 'Show Calendar View'}
+                            </button>
                         </div>
                     </div>
 
-                    {/* 1. Leave Balance Summary */}
+                    {showCalendar && (
+                        <div>
+                            <EmployeeLeaveCalendar leaves={calendarLeaves} />
+                        </div>
+                    )}
+
                     <section className="space-y-2">
                         <h2 className="text-lg font-semibold">Leave Balance</h2>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -86,7 +88,7 @@ export default function EmployeeDashboard() {
                         </div>
                     </section>
 
-                    {/* 2. Pending Requests */}
+                    {/* Rest of your sections... */}
                     <section>
                         <h2 className="mb-2 text-lg font-semibold">Pending Requests</h2>
                         <div className="flex flex-col gap-4 md:flex-row">
@@ -109,7 +111,6 @@ export default function EmployeeDashboard() {
                         </div>
                     </section>
 
-                    {/* 3. Recent Leave History */}
                     <section>
                         <h2 className="mb-2 text-lg font-semibold">Recent Leave History</h2>
                         <div className="overflow-x-auto rounded-xl border bg-white shadow">
@@ -150,7 +151,6 @@ export default function EmployeeDashboard() {
                         </div>
                     </section>
 
-                    {/* 4. Team Availability */}
                     <section>
                         <h2 className="mb-2 text-lg font-semibold">Team on Leave Today</h2>
                         <div className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow">
@@ -166,7 +166,6 @@ export default function EmployeeDashboard() {
                         </div>
                     </section>
 
-                    {/* 5. Shift & Manager Info */}
                     {shiftInfo && (
                         <section>
                             <h2 className="mb-2 text-lg font-semibold">Shift & Manager Info</h2>

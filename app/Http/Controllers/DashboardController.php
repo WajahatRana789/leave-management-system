@@ -54,10 +54,15 @@ class DashboardController extends Controller
         // Shift and manager info
         $shift = Shift::with('manager')->find($user->shift_id);
 
+        $calendarLeaves = LeaveRequest::with('leaveType')
+            ->where('user_id', $user->id)
+            ->get();
+
         return Inertia::render('dashboards/employee-dashboard', [
             'leaveBalances' => $leaveBalances,
             'recentLeaves' => $recentLeaves,
             'teamOnLeaveToday' => $teamOnLeaveToday,
+            'calendarLeaves' => $calendarLeaves,
             'shiftInfo' => $shift ? [
                 'name' => $shift->name,
                 'manager' => [

@@ -41,3 +41,41 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export type LeaveRequest = {
+    id: number;
+    from_date: string;
+    to_date: string;
+    status: 'pending' | 'approved' | 'rejected';
+    reviewed_at?: string | null;
+    remarks?: string | null;
+    total_days?: number;
+    leave_type: {
+        name: string;
+    };
+};
+
+export type LeaveBalance = {
+    id: number;
+    name: string;
+    default_days: number;
+    used_days: number;
+    remaining_days: number;
+};
+
+export type TeamMemberOnLeave = {
+    user: {
+        name: string;
+    };
+    leave_type: {
+        name: string;
+    };
+};
+
+export type ShiftInfo = {
+    name: string;
+    manager?: {
+        name: string;
+        email: string;
+    };
+};
