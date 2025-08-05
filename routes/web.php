@@ -8,7 +8,6 @@ use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -29,9 +28,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard routes
     Route::get('/dashboard/employee', [DashboardController::class, 'employeeDashboard'])->name('employee.dashboard');
-    // Route::get('/dashboard/manager', [DashboardController::class, 'managerDashboard'])->name('manager.dashboard');
-    // Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
-    // Route::get('/dashboard/superadmin', [DashboardController::class, 'superAdminDashboard'])->name('superadmin.dashboard');
+    Route::get('/dashboard/manager', [DashboardController::class, 'managerDashboard'])->name('manager.dashboard');
+    Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
+    Route::get('/dashboard/superadmin', [DashboardController::class, 'superAdminDashboard'])->name('superadmin.dashboard');
 
     // Super Admin only routes
     Route::middleware(['super_admin'])->group(function () {

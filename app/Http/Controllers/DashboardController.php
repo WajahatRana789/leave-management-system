@@ -67,4 +67,19 @@ class DashboardController extends Controller
             ] : null,
         ]);
     }
+
+    public function managerDashboard(Request $request)
+    {
+        return Inertia::render('dashboards/manager-dashboard', []);
+    }
+
+    public function adminDashboard(Request $request)
+    {
+        return Inertia::render('dashboards/admin-dashboard', []);
+    }
+
+    public function superAdminDashboard(Request $request)
+    {
+        return Inertia::render('dashboards/super-admin-dashboard', []);
+    }
 }
