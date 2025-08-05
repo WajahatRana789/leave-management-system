@@ -14,7 +14,7 @@ class LeaveTypeSeeder extends Seeder
     public function run(): void
     {
         LeaveType::insert([
-            ['name' => 'Casual Leave', 'default_days' => 8, 'created_at' => now(), 'updated_at' => now()],
+            ['name' => 'Casual Leave', 'default_days' => 20, 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Sick Leave', 'default_days' => 8, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
