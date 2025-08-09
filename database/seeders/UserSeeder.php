@@ -82,7 +82,7 @@ class UserSeeder extends Seeder
 
             $user->leaveRequests()->create([
                 'user_id' => $user->id,
-                'leave_type_id' => rand(1, 2),
+                'leave_type_id' => rand(1, 1),
                 'from_date' => $startDate->toDateString(),
                 'to_date' => $endDate->toDateString(),
                 'total_days' => $duration,
