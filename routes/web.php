@@ -3,6 +3,7 @@
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\LeaveTypeController;
+use App\Http\Controllers\LieuOffController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -55,6 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/leave-types/{leaveType}', [LeaveTypeController::class, 'update'])->name('leave-types.update');
         Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class, 'destroy'])->name('leave-types.destroy');
     });
+
+    Route::get('/lieu-leaves', [LieuOffController::class, 'index'])->name('lieu-leaves.index');
+    Route::get('/lieu-leaves/create', [LieuOffController::class, 'create'])->name('lieu-leaves.create');
 
     // Regular user routes
     Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
