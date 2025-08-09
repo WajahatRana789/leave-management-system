@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class LieuOff extends Model
 {
+    protected $fillable = ['user_id', 'granted_by', 'work_date', 'expiry_date', 'status', 'manager_remarks', 'used_at'];
+
     public function user()
     {
         return $this->belongsTo(User::class);

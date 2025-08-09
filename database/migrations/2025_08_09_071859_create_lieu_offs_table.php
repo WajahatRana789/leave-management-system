@@ -18,6 +18,8 @@ return new class extends Migration
             $table->date('work_date'); // The off day they actually worked
             $table->date('expiry_date'); // 2 months from work_date
             $table->enum('status', ['available', 'used', 'expired'])->default('available');
+            $table->text('remarks')->nullable();
+            $table->date('used_at');
             $table->timestamps();
         });
     }
