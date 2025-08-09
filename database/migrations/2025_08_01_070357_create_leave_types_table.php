@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('leave_types', function (Blueprint $table) {
             $table->id();
+            $table->string('key'); // sick_leave, casual_leave
             $table->string('name'); // Sick Leave, Casual Leave
             $table->unsignedTinyInteger('default_days')->default(0);
             $table->timestamps();
