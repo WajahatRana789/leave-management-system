@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { Pencil, Trash2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -61,10 +62,12 @@ const columns: ColumnDef<User>[] = [
             return (
                 <div className="flex items-center gap-2">
                     <Button size="sm" variant="outline" asChild>
-                        <Link href={route('users.edit', user.id)}>Edit</Link>
+                        <Link href={route('users.edit', user.id)}>
+                            <Pencil className="h-4 w-4" />
+                        </Link>
                     </Button>
                     <Button size="sm" variant="destructive" onClick={handleDelete} disabled={user.role === 'super_admin'}>
-                        Delete
+                        <Trash2 className="h-4 w-4 text-white" />
                     </Button>
                 </div>
             );
