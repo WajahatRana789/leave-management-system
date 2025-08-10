@@ -17,7 +17,12 @@ class LieuOffController extends Controller
         $query = LieuOff::with(['user', 'grantedByUser']);
 
         if ($user->role === 'manager') {
-            $query->where('granted_by', $user->id);
+            // Get lieu leaves for all team members under this manager
+            $query->whereHas('user', function ($q) use ($user) {
+                $q->whereHas('shift', function ($q) use ($user) {
+                    $q->where('manager_id', $user->id);
+                });
+            });
         }
 
         $lieuLeaves = $query->latest()->paginate(10);

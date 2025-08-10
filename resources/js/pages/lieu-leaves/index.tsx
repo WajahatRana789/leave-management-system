@@ -136,7 +136,7 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Lieu Leaves</h1>
-                    {['admin', 'super_admin'].includes(auth.user.role) && (
+                    {['manager', 'admin', 'super_admin'].includes(auth.user.role) && (
                         <Button asChild>
                             <Link href={route('lieu-leaves.create')}>Grant Lieu Leave</Link>
                         </Button>
