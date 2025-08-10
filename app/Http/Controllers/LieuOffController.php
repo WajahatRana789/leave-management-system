@@ -14,7 +14,13 @@ class LieuOffController extends Controller
     {
         $user = auth()->user();
 
-        $query = LieuOff::with(['user', 'grantedByUser']);
+        // Eager load user with shift, and grantedByUser
+        $query = LieuOff::with([
+            'user' => function ($query) {
+                $query->with('shift');
+            },
+            'grantedByUser'
+        ]);
 
         if ($user->role === 'manager') {
             // Get lieu leaves for all team members under this manager

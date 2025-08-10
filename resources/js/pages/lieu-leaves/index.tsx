@@ -25,7 +25,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 interface LieuLeave {
     id: number;
-    user: { id: number; name: string };
+    user: {
+        id: number;
+        name: string;
+        shift?: {
+            id: number;
+            name: string;
+            manager_id: number;
+        };
+    };
     granted_by_user: { id: number; name: string };
     work_date: string;
     expiry_date: string;
@@ -50,6 +58,7 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
 
     const columns: ColumnDef<LieuLeave>[] = [
         { accessorKey: 'user.name', header: 'Employee', cell: ({ row }) => row.original.user?.name || '-' },
+        { accessorKey: 'user.shift.name', header: 'Shift', cell: ({ row }) => row.original.user?.shift?.name || '-' },
         { accessorKey: 'granted_by_user.name', header: 'Granted By', cell: ({ row }) => row.original.granted_by_user?.name || '-' },
         { accessorKey: 'work_date', header: 'Work Date' },
         { accessorKey: 'expiry_date', header: 'Expiry Date' },
@@ -75,13 +84,29 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
             header: 'Actions',
             cell: ({ row }) => {
                 const lieuLeave = row.original;
-                const canEdit = ['manager', 'admin', 'super_admin'].includes(auth.user.role);
-                const canDelete = ['manager', 'admin', 'super_admin'].includes(auth.user.role) && lieuLeave.status === 'available';
+                const currentUser = auth.user;
+
+                // Check if current user is the manager of this employee
+                const isTeamManager = currentUser.role === 'manager' && lieuLeave.user?.shift?.manager_id === currentUser.id;
+
+                // Check if current user granted this leave
+                const isGrantedByCurrentUser = currentUser.id === lieuLeave.granted_by_user?.id;
+
+                // Admins/Super Admins can edit any lieu leave
+                // Managers can edit leaves for their team members
+                const canEdit = ['admin', 'super_admin'].includes(currentUser.role) || (currentUser.role === 'manager' && isTeamManager);
+
+                // Only available status can be deleted
+                // Managers can only delete leaves they granted for their team members
+                const canDelete =
+                    lieuLeave.status === 'available' &&
+                    (['admin', 'super_admin'].includes(currentUser.role) ||
+                        (currentUser.role === 'manager' && isTeamManager && isGrantedByCurrentUser));
 
                 return (
                     <div className="flex items-center gap-2">
                         {canEdit && (
-                            <Button size="sm" variant="outline" asChild>
+                            <Button size="sm" variant="ghost" asChild>
                                 <Link href={route('lieu-leaves.edit', lieuLeave.id)}>
                                     <Pencil className="h-4 w-4" />
                                 </Link>
@@ -90,13 +115,13 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
                         {canDelete && (
                             <Button
                                 size="sm"
-                                variant="destructive"
+                                variant="ghost"
                                 onClick={() => {
                                     setDeleteId(lieuLeave.id);
                                     setIsDeleteDialogOpen(true);
                                 }}
                             >
-                                <Trash2 className="h-4 w-4 text-white" />
+                                <Trash2 className="h-4 w-4 text-red-500" />
                             </Button>
                         )}
                     </div>
