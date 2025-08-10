@@ -94,7 +94,7 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
                                                     disabled={type.remaining <= 0}
                                                     className={type.remaining <= 0 ? 'opacity-50' : ''}
                                                 >
-                                                    {type.name} {type.remaining <= 0 && '(No balance)'}
+                                                    {type.name} ({type.remaining})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
