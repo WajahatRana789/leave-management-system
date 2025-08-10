@@ -17,4 +17,9 @@ class LieuOff extends Model
     {
         return $this->belongsTo(User::class, 'granted_by');
     }
+
+    public function leaveRequest()
+    {
+        return $this->hasOne(LeaveRequest::class, 'lieu_off_id');
+    }
 }

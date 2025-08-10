@@ -32,6 +32,11 @@ const employeeNavItems: NavItem[] = [
         icon: List,
     },
     {
+        title: 'My Lieu Offs',
+        href: '/my-lieu-offs',
+        icon: List,
+    },
+    {
         title: 'Request For Leave',
         href: '/leave-requests/create',
         icon: Send,

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LeaveType;
 use App\Models\LieuOff;
 use App\Models\User;
 use Carbon\Carbon;
@@ -163,5 +164,27 @@ class LieuOffController extends Controller
         // 6. Redirect with success message
         return redirect()->route('lieu-leaves.index')
             ->with('success', 'Lieu Off deleted successfully.');
+    }
+
+    public function mylieuOffs()
+    {
+        $user = auth()->user();
+
+        // Fetch only this user's Lieu Offs
+        $lieuOffs = LieuOff::with('grantedByUser') // load who granted the leave
+            ->where('user_id', $user->id)
+            ->latest()
+            ->paginate(10);
+
+        $leaveTypeId = null;
+        $leaveType = LeaveType::where('key', 'lieu_leave')->first();
+        if ($leaveType) {
+            $leaveTypeId = $leaveType->id;
+        }
+
+        return Inertia::render('lieu-leaves/my-lieu-offs', [
+            'lieuOffs' => $lieuOffs,
+            'leaveTypeId' => $leaveTypeId
+        ]);
     }
 }

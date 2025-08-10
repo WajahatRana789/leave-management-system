@@ -266,6 +266,25 @@ class LeaveRequestController extends Controller
     {
         $lieuOffId = $validated['lieu_off_id'];
 
+        // Fetch the Lieu Off record
+        $lieuOff = LieuOff::where('id', $lieuOffId)
+            ->where('user_id', $user->id)
+            ->firstOrFail();
+
+        // Check that duration is exactly 1 day
+        if ($totalDays != 1) {
+            throw ValidationException::withMessages([
+                'to_date' => 'Lieu leave must be for exactly 1 day.',
+            ]);
+        }
+
+        // Check that the leave date is after the work date
+        if ($fromDate->lessThanOrEqualTo($lieuOff->work_date)) {
+            throw ValidationException::withMessages([
+                'from_date' => 'Leave date must be after the work date.',
+            ]);
+        }
+
         // Check available lieu days
         $availableLieuDays = LieuOff::where('user_id', $user->id)
             ->where('status', 'available')
@@ -297,6 +316,14 @@ class LeaveRequestController extends Controller
             ]);
         }
 
+        // Prevent duplicate Lieu Off usage
+        $alreadyUsed = LeaveRequest::where('lieu_off_id', $lieuOffId)->exists();
+        if ($alreadyUsed) {
+            throw ValidationException::withMessages([
+                'from_date' => 'This lieu leave has already been used for a leave request.',
+            ]);
+        }
+
         // Create the leave request
         $leaveRequest = LeaveRequest::create([
             'user_id' => $user->id,
@@ -307,6 +334,11 @@ class LeaveRequestController extends Controller
             'reason' => $validated['reason'],
             'total_days' => $totalDays,
         ]);
+
+        // Update the LieuOff status to pending_approval
+        if ($lieuOffId) {
+            LieuOff::where('id', $lieuOffId)->update(['status' => 'pending_approval']);
+        }
 
         return redirect()->route('leave-requests.index')->with('success', 'Lieu leave request submitted.');
     }
@@ -353,7 +385,7 @@ class LeaveRequestController extends Controller
         // Handle lieu leave
         if ($leaveRequest->leaveType->key === 'lieu_leave') {
             $lieuOffs = LieuOff::where('user_id', $leaveRequest->user_id)
-                ->where('status', 'available')
+                ->whereIn('status', ['available', 'pending_approval'])
                 ->where('expiry_date', '>=', now())
                 ->orderBy('work_date') // First in, first out
                 ->limit($leaveRequest->total_days)

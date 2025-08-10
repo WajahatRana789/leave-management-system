@@ -62,6 +62,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/lieu-leaves', [LieuOffController::class, 'store'])->name('lieu-leaves.store');
     Route::get('/lieu-leaves/{lieuOff}/edit', [LieuOffController::class, 'edit'])->name('lieu-leaves.edit');
     Route::delete('/lieu-leaves/{lieuOff}', [LieuOffController::class, 'destroy'])->name('lieu-leaves.destroy');
+    Route::get('/my-lieu-offs', [LieuOffController::class, 'mylieuOffs'])->name('my-lieu-offs.index');
 
     // Regular user routes
     Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
@@ -71,7 +72,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/leave-requests/create', [LeaveRequestController::class, 'create'])->name('leave-requests.create');
     Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
     Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');
-
     Route::post('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
     Route::post('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
 });

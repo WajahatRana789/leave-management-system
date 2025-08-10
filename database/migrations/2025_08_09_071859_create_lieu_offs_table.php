@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('granted_by')->constrained('users')->onDelete('cascade'); // Manager or Admin
             $table->date('work_date'); // The off day they actually worked
             $table->date('expiry_date'); // 2 months from work_date
-            $table->enum('status', ['available', 'used', 'expired'])->default('available');
+            $table->enum('status', ['available', 'used', 'expired', 'pending_approval'])->default('available');
             $table->text('remarks')->nullable();
             $table->date('used_at')->nullable();
             $table->timestamps();
