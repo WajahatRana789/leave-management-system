@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LieuOff;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -50,5 +51,63 @@ class LieuOffController extends Controller
         return inertia('lieu-leaves/create', [
             'users' => $users
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $authUser = auth()->user();
+
+        // 1. Authorize
+        if (!in_array($authUser->role, ['manager', 'admin', 'super_admin'])) {
+            abort(403, 'You are not authorized to grant lieu leave.');
+        }
+
+        // 2. Validate
+        $validated = $request->validate([
+            'user_id'     => 'required|exists:users,id',
+            'work_date'   => 'required|date',
+            'expiry_date' => 'nullable|date|after_or_equal:work_date',
+            'reason'      => 'nullable|string|max:1000',
+        ]);
+
+        // 3. Set expiry date if not provided
+        if (empty($validated['expiry_date'])) {
+            $validated['expiry_date'] = Carbon::parse($validated['work_date'])->addDays(60)->toDateString();
+        }
+
+        // 4. Manager restriction
+        if ($authUser->role === 'manager') {
+            $isTeamMember = User::where('id', $validated['user_id'])
+                ->whereHas('shift', fn($q) => $q->where('manager_id', $authUser->id))
+                ->exists();
+
+            if (!$isTeamMember) {
+                abort(403, 'You can only grant lieu leave to members of your team.');
+            }
+        }
+
+        // 5. Prevent duplicate record for same work_date
+        $duplicateExists = LieuOff::where('user_id', $validated['user_id'])
+            ->whereDate('work_date', $validated['work_date'])
+            ->exists();
+
+        if ($duplicateExists) {
+            return redirect()->back()
+                ->withErrors(['work_date' => 'A lieu leave for this employee on the same work date already exists.'])
+                ->withInput();
+        }
+
+        // 6. Create record
+        LieuOff::create([
+            'user_id'     => $validated['user_id'],
+            'granted_by'  => $authUser->id,
+            'work_date'   => $validated['work_date'],
+            'expiry_date' => $validated['expiry_date'],
+            'status'      => 'available',
+            'remarks'     => $validated['reason'],
+        ]);
+
+        // 7. Redirect success
+        return redirect()->route('lieu-leaves.index')->with('success', 'Lieu leave granted successfully.');
     }
 }

@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'; // Import Dialog components
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react';
@@ -32,15 +32,20 @@ interface UsersProps {
         total: number;
         links: { url: string | null; label: string; active: boolean }[];
     };
+    errors?: {
+        [key: string]: string;
+    };
 }
 
-export default function GrantLieuLeavePage({ users }: UsersProps) {
+export default function GrantLieuLeavePage({ users, errors }: UsersProps) {
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [form, setForm] = useState({
         work_date: '',
         expiry_date: '',
+        expiry_option: '60',
         reason: '',
     });
+    const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
 
     const table = useReactTable({
         data: users.data,
@@ -64,7 +69,8 @@ export default function GrantLieuLeavePage({ users }: UsersProps) {
                             variant="outline"
                             onClick={() => {
                                 setSelectedUser(user);
-                                setForm({ work_date: '', expiry_date: '', reason: '' });
+                                setForm({ work_date: '', expiry_date: '', expiry_option: '60', reason: '' });
+                                setFormErrors({});
                             }}
                         >
                             Grant
@@ -88,12 +94,17 @@ export default function GrantLieuLeavePage({ users }: UsersProps) {
             {
                 user_id: selectedUser.id,
                 work_date: form.work_date,
-                expiry_date: form.expiry_date,
+                expiry_date: form.expiry_option === '60' ? '' : form.expiry_date,
+                expiry_option: form.expiry_option,
                 reason: form.reason,
             },
             {
                 onSuccess: () => {
                     setSelectedUser(null);
+                    setFormErrors({});
+                },
+                onError: (errors) => {
+                    setFormErrors(errors);
                 },
             },
         );
@@ -204,7 +215,15 @@ export default function GrantLieuLeavePage({ users }: UsersProps) {
             </div>
 
             {/* Dialog Component */}
-            <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+            <Dialog
+                open={!!selectedUser}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setSelectedUser(null);
+                        setFormErrors({});
+                    }
+                }}
+            >
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Grant Lieu Leave to {selectedUser?.name}</DialogTitle>
@@ -216,29 +235,33 @@ export default function GrantLieuLeavePage({ users }: UsersProps) {
                                 type="date"
                                 value={form.work_date}
                                 onChange={(e) => setForm({ ...form, work_date: e.target.value })}
-                                className="w-full rounded border px-2 py-1"
+                                className={`w-full rounded border px-2 py-1 ${formErrors.work_date ? 'border-red-500' : ''}`}
                                 required
                             />
+                            {formErrors.work_date && <p className="mt-1 text-sm text-red-600">{formErrors.work_date}</p>}
                         </div>
                         <div>
                             <label className="block text-sm font-medium">Expiry</label>
                             <select
                                 value={form.expiry_option}
                                 onChange={(e) => setForm({ ...form, expiry_option: e.target.value })}
-                                className="w-full rounded border px-2 py-1"
+                                className={`w-full rounded border px-2 py-1 ${formErrors.expiry_date ? 'border-red-500' : ''}`}
                             >
                                 <option value="60">After 60 days (default)</option>
                                 <option value="custom">Custom date</option>
                             </select>
                             {form.expiry_option === 'custom' && (
-                                <input
-                                    type="date"
-                                    value={form.expiry_date}
-                                    onChange={(e) => setForm({ ...form, expiry_date: e.target.value })}
-                                    className="mt-2 w-full rounded border px-2 py-1"
-                                    required={form.expiry_option === 'custom'}
-                                    min={form.work_date} // Ensure expiry is after work date
-                                />
+                                <>
+                                    <input
+                                        type="date"
+                                        value={form.expiry_date}
+                                        onChange={(e) => setForm({ ...form, expiry_date: e.target.value })}
+                                        className={`mt-2 w-full rounded border px-2 py-1 ${formErrors.expiry_date ? 'border-red-500' : ''}`}
+                                        required={form.expiry_option === 'custom'}
+                                        min={form.work_date}
+                                    />
+                                    {formErrors.expiry_date && <p className="mt-1 text-sm text-red-600">{formErrors.expiry_date}</p>}
+                                </>
                             )}
                         </div>
                         <div>
@@ -246,15 +269,24 @@ export default function GrantLieuLeavePage({ users }: UsersProps) {
                             <textarea
                                 value={form.reason}
                                 onChange={(e) => setForm({ ...form, reason: e.target.value })}
-                                className="w-full rounded border px-2 py-1"
+                                className={`w-full rounded border px-2 py-1 ${formErrors.reason ? 'border-red-500' : ''}`}
                                 rows={3}
                                 required
                             />
+                            {formErrors.reason && <p className="mt-1 text-sm text-red-600">{formErrors.reason}</p>}
                         </div>
+                        {/* Display non-field specific errors */}
+                        {formErrors.user_id && <p className="mt-1 text-sm text-red-600">{formErrors.user_id}</p>}
                     </div>
 
                     <div className="mt-6 flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => setSelectedUser(null)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => {
+                                setSelectedUser(null);
+                                setFormErrors({});
+                            }}
+                        >
                             Cancel
                         </Button>
                         <Button onClick={handleSubmit}>Grant</Button>
