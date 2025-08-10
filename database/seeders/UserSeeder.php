@@ -39,7 +39,7 @@ class UserSeeder extends Seeder
 
         // Generate 100 employees distributed over 3 shifts
 
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $shiftId = (($i - 1) % 3) + 1; // Cycle through shift_id 1, 2, 3
 
             User::create([
@@ -80,15 +80,15 @@ class UserSeeder extends Seeder
                 $duration = $startDate->diffInDays($endDate) + 1;
             }
 
-            $user->leaveRequests()->create([
-                'user_id' => $user->id,
-                'leave_type_id' => rand(1, 1),
-                'from_date' => $startDate->toDateString(),
-                'to_date' => $endDate->toDateString(),
-                'total_days' => $duration,
-                'reason' => '',
-                'status' => Arr::random(['pending', 'approved', 'rejected']),
-            ]);
+            // $user->leaveRequests()->create([
+            //     'user_id' => $user->id,
+            //     'leave_type_id' => rand(1, 1),
+            //     'from_date' => $startDate->toDateString(),
+            //     'to_date' => $endDate->toDateString(),
+            //     'total_days' => $duration,
+            //     'reason' => '',
+            //     'status' => Arr::random(['pending', 'approved', 'rejected']),
+            // ]);
         }
     }
 }

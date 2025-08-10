@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Employee applying for leave
             $table->foreignId('leave_type_id')->constrained()->onDelete('cascade');
+            $table->foreignId('lieu_off_id')->nullable();
             $table->date('from_date');
             $table->date('to_date');
             $table->unsignedTinyInteger('total_days');

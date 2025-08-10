@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
+use App\Models\LieuOff;
 use App\Models\Shift;
 use App\Models\User;
 use Carbon\Carbon;
@@ -147,14 +148,26 @@ class LeaveRequestController extends Controller
             return [
                 'id' => $type->id,
                 'name' => $type->name,
+                'key' => $type->key,
                 'allocated' => $type->default_days,
                 'used' => $usedDays,
                 'remaining' => max(0, $type->default_days - $usedDays),
             ];
         });
 
+        // Get available lieu off records
+        $availableLieuOffs = LieuOff::where('user_id', $user->id)
+            ->where('status', 'available')
+            ->where('expiry_date', '>=', now())
+            ->orderBy('work_date')
+            ->get();
+
+        $availableLieuDays = $availableLieuOffs->count();
+
         return Inertia::render('leave-requests/create', [
             'leaveTypes' => $leaveTypes,
+            'availableLieuOffCount' => $availableLieuDays,
+            'availableLieuOffs' => $availableLieuOffs
         ]);
     }
 
@@ -168,11 +181,39 @@ class LeaveRequestController extends Controller
             'from_date' => 'required|date',
             'to_date' => 'required|date|after_or_equal:from_date',
             'reason' => 'nullable|string|max:255',
+            'lieu_off_id' => 'nullable|exists:lieu_offs,id'
         ])->validate();
 
         $fromDate = Carbon::parse($validated['from_date']);
         $toDate = Carbon::parse($validated['to_date']);
         $totalDays = $fromDate->diffInDays($toDate) + 1;
+
+        $leaveType = LeaveType::find($validated['leave_type_id']);
+
+        // Handle lieu leave differently
+        if ($leaveType->key === 'lieu_leave') {
+            // Make sure a lieu_off_id is provided
+            if (empty($validated['lieu_off_id'])) {
+                return back()->withErrors([
+                    'lieu_off_id' => 'Please select a valid Lieu Off date.'
+                ])->withInput();
+            }
+
+            // Check that the lieu off record belongs to the user and is unused
+            $lieuOff = LieuOff::where('id', $validated['lieu_off_id'])
+                ->where('user_id', $user->id)
+                ->whereNull('used_at') // assuming you track if it’s used
+                ->where('expiry_date', '>=', now())
+                ->first();
+
+            if (!$lieuOff) {
+                return back()->withErrors([
+                    'lieu_off_id' => 'Selected Lieu Off is not available.'
+                ])->withInput();
+            }
+
+            return $this->storeLieuLeaveRequest($user, $validated, $fromDate, $toDate, $totalDays);
+        }
 
         // Step 2: Check for overlapping leave requests (only if pending)
         $hasOverlap = LeaveRequest::where('user_id', $user->id)
@@ -221,6 +262,55 @@ class LeaveRequestController extends Controller
         return redirect()->route('leave-requests.index')->with('success', 'Leave request submitted.');
     }
 
+    protected function storeLieuLeaveRequest($user, $validated, $fromDate, $toDate, $totalDays)
+    {
+        $lieuOffId = $validated['lieu_off_id'];
+
+        // Check available lieu days
+        $availableLieuDays = LieuOff::where('user_id', $user->id)
+            ->where('status', 'available')
+            ->where('expiry_date', '>=', now())
+            ->count();
+
+        if ($totalDays > $availableLieuDays) {
+            throw ValidationException::withMessages([
+                'to_date' => "You only have {$availableLieuDays} lieu days available.",
+            ]);
+        }
+
+        // Check for overlapping requests
+        $hasOverlap = LeaveRequest::where('user_id', $user->id)
+            ->where('status', 'pending')
+            ->where(function ($query) use ($fromDate, $toDate) {
+                $query->whereBetween('from_date', [$fromDate, $toDate])
+                    ->orWhereBetween('to_date', [$fromDate, $toDate])
+                    ->orWhere(function ($query) use ($fromDate, $toDate) {
+                        $query->where('from_date', '<=', $fromDate)
+                            ->where('to_date', '>=', $toDate);
+                    });
+            })
+            ->exists();
+
+        if ($hasOverlap) {
+            throw ValidationException::withMessages([
+                'from_date' => 'You already have a pending leave request in this date range.',
+            ]);
+        }
+
+        // Create the leave request
+        $leaveRequest = LeaveRequest::create([
+            'user_id' => $user->id,
+            'leave_type_id' => $validated['leave_type_id'],
+            'lieu_off_id' => $lieuOffId,
+            'from_date' => $fromDate->toDateString(),
+            'to_date' => $toDate->toDateString(),
+            'reason' => $validated['reason'],
+            'total_days' => $totalDays,
+        ]);
+
+        return redirect()->route('leave-requests.index')->with('success', 'Lieu leave request submitted.');
+    }
+
     public function destroy(LeaveRequest $leaveRequest)
     {
         $user = auth()->user();
@@ -258,6 +348,27 @@ class LeaveRequestController extends Controller
         // Only allow approving pending requests
         if ($leaveRequest->status !== 'pending') {
             return back()->with('error', 'Only pending leave requests can be approved.');
+        }
+
+        // Handle lieu leave
+        if ($leaveRequest->leaveType->key === 'lieu_leave') {
+            $lieuOffs = LieuOff::where('user_id', $leaveRequest->user_id)
+                ->where('status', 'available')
+                ->where('expiry_date', '>=', now())
+                ->orderBy('work_date') // First in, first out
+                ->limit($leaveRequest->total_days)
+                ->get();
+
+            if ($lieuOffs->count() < $leaveRequest->total_days) {
+                return back()->with('error', 'Not enough available lieu days.');
+            }
+
+            foreach ($lieuOffs as $lieuOff) {
+                $lieuOff->update([
+                    'status' => 'used',
+                    'used_at' => now(),
+                ]);
+            }
         }
 
         $leaveRequest->update([

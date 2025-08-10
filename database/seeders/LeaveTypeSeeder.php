@@ -22,5 +22,15 @@ class LeaveTypeSeeder extends Seeder
                 'updated_at' => now()
             ],
         ]);
+
+        LeaveType::insert([
+            [
+                'key' => 'lieu_leave',
+                'name' => 'Lieu Leave',
+                'default_days' => 0,
+                'created_at' => now(),
+                'updated_at' => now()
+            ],
+        ]);
     }
 }

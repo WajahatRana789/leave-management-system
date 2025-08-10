@@ -7,14 +7,25 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 
+interface LeaveType {
+    id: number;
+    name: string;
+    allocated: number;
+    used: number;
+    remaining: number;
+    key: string;
+}
+
+interface LieuOff {
+    id: number;
+    work_date: string;
+    expiry_date: string;
+}
+
 interface Props {
-    leaveTypes: {
-        id: number;
-        name: string;
-        allocated: number;
-        used: number;
-        remaining: number;
-    }[];
+    leaveTypes: LeaveType[];
+    availableLieuOffCount: number;
+    availableLieuOffs: LieuOff[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -23,9 +34,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Apply for Leave', href: '#' },
 ];
 
-export default function CreateLeaveRequest({ leaveTypes }: Props) {
+export default function CreateLeaveRequest({ leaveTypes, availableLieuOffs, availableLieuOffCount }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         leave_type_id: '',
+        lieu_off_id: '',
+        is_lieu_off: false,
         from_date: '',
         to_date: '',
         reason: '',
@@ -34,18 +47,18 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Frontend validation for zero balance
         const selectedLeaveType = leaveTypes.find((type) => String(type.id) === data.leave_type_id);
-        if (selectedLeaveType && selectedLeaveType.remaining <= 0) {
-            return;
+
+        if (selectedLeaveType) {
+            if (selectedLeaveType.key === 'lieu_leave' && availableLieuOffCount <= 0) return;
+            if (selectedLeaveType.key !== 'lieu_leave' && selectedLeaveType.remaining <= 0) return;
         }
 
         post('/leave-requests');
     };
 
-    // Get the selected leave type's remaining balance
     const selectedLeaveType = leaveTypes.find((type) => String(type.id) === data.leave_type_id);
-    const remainingBalance = selectedLeaveType?.remaining ?? null;
+    const remainingBalance = selectedLeaveType?.key === 'lieu_leave' ? availableLieuOffCount : (selectedLeaveType?.remaining ?? null);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -54,49 +67,41 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Apply for Leave</h1>
                 </div>
-                {/* <div>
-                    <table className="mt-4 mb-4 w-full rounded-lg border p-4">
-                        <thead>
-                            <tr className="border-b">
-                                <th className="p-2 text-left text-sm">Leave Type</th>
-                                <th className="p-2 text-left text-sm">Allocated</th>
-                                <th className="p-2 text-left text-sm">Used</th>
-                                <th className="p-2 text-left text-sm">Remaining</th>
-                            </tr>
-                        </thead>
-                        <tbody className="text-sm">
-                            {leaveTypes.map((type) => (
-                                <tr key={type.id} className="border-b">
-                                    <td className="p-2 text-sm font-medium">{type.name}</td>
-                                    <td className="p-2 text-sm">{type.allocated}</td>
-                                    <td className="p-2 text-sm">{type.used}</td>
-                                    <td className={`p-2 text-sm ${type.remaining <= 0 ? 'font-semibold text-red-500' : ''}`}>{type.remaining}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div> */}
+
                 <div className="pt-4">
                     <form onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                {/* Leave Type */}
                                 <div>
                                     <Label htmlFor="leave_type_id">Leave Type*</Label>
-                                    <Select value={data.leave_type_id} onValueChange={(value) => setData('leave_type_id', value)}>
+                                    <Select
+                                        value={data.leave_type_id}
+                                        onValueChange={(value) => {
+                                            setData('leave_type_id', value);
+                                            setData('lieu_off_id', '');
+                                            setData('is_lieu_off', false);
+                                        }}
+                                    >
                                         <SelectTrigger>
                                             <SelectValue placeholder="Select leave type" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {leaveTypes.map((type) => (
-                                                <SelectItem
-                                                    key={type.id}
-                                                    value={String(type.id)}
-                                                    disabled={type.remaining <= 0}
-                                                    className={type.remaining <= 0 ? 'opacity-50' : ''}
-                                                >
-                                                    {type.name} ({type.remaining})
-                                                </SelectItem>
-                                            ))}
+                                            {leaveTypes.map((type) => {
+                                                const isLieu = type.key === 'lieu_leave';
+                                                const isDisabled = isLieu ? availableLieuOffCount <= 0 : type.remaining <= 0;
+
+                                                return (
+                                                    <SelectItem
+                                                        key={type.id}
+                                                        value={String(type.id)}
+                                                        disabled={isDisabled}
+                                                        className={isDisabled ? 'opacity-50' : ''}
+                                                    >
+                                                        {type.name} ({isLieu ? availableLieuOffCount : type.remaining})
+                                                    </SelectItem>
+                                                );
+                                            })}
                                         </SelectContent>
                                     </Select>
                                     {errors.leave_type_id && <p className="text-sm text-red-500">{errors.leave_type_id}</p>}
@@ -108,6 +113,33 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
                                     )}
                                 </div>
 
+                                {/* Lieu Off Date Selection */}
+                                {selectedLeaveType?.key === 'lieu_leave' && availableLieuOffs.length > 0 && (
+                                    <div>
+                                        <Label htmlFor="lieu_off_id">Select Lieu Date*</Label>
+                                        <Select
+                                            value={data.lieu_off_id}
+                                            onValueChange={(value) => {
+                                                setData('lieu_off_id', value);
+                                                setData('is_lieu_off', true);
+                                            }}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select available lieu date" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availableLieuOffs.map((lieu) => (
+                                                    <SelectItem key={lieu.id} value={String(lieu.id)}>
+                                                        {lieu.work_date} (expires {lieu.expiry_date})
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.lieu_off_id && <p className="text-sm text-red-500">{errors.lieu_off_id}</p>}
+                                    </div>
+                                )}
+
+                                {/* From Date */}
                                 <div>
                                     <Label htmlFor="from_date">From Date*</Label>
                                     <Input
@@ -120,6 +152,7 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
                                     {errors.from_date && <p className="text-sm text-red-500">{errors.from_date}</p>}
                                 </div>
 
+                                {/* To Date */}
                                 <div>
                                     <Label htmlFor="to_date">To Date*</Label>
                                     <Input
@@ -133,17 +166,27 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
                                 </div>
                             </div>
 
+                            {/* Reason */}
                             <div>
                                 <Label htmlFor="reason">Reason (optional)</Label>
                                 <Textarea id="reason" rows={3} value={data.reason} onChange={(e) => setData('reason', e.target.value)} />
                                 {errors.reason && <p className="text-sm text-red-500">{errors.reason}</p>}
                             </div>
 
+                            {/* Actions */}
                             <div className="flex justify-end space-x-2 pt-4">
                                 <Button type="button" variant="outline" onClick={() => window.history.back()}>
                                     Cancel
                                 </Button>
-                                <Button type="submit" disabled={processing || (selectedLeaveType?.remaining ?? 0) <= 0}>
+                                <Button
+                                    type="submit"
+                                    disabled={
+                                        processing ||
+                                        (selectedLeaveType?.key === 'lieu_leave'
+                                            ? availableLieuOffCount <= 0 || !data.lieu_off_id
+                                            : (selectedLeaveType?.remaining ?? 0) <= 0)
+                                    }
+                                >
                                     {processing ? 'Submitting...' : 'Apply for Leave'}
                                 </Button>
                             </div>
