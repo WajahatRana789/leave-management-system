@@ -54,7 +54,7 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Apply for Leave</h1>
                 </div>
-                <div>
+                {/* <div>
                     <table className="mt-4 mb-4 w-full rounded-lg border p-4">
                         <thead>
                             <tr className="border-b">
@@ -75,7 +75,7 @@ export default function CreateLeaveRequest({ leaveTypes }: Props) {
                             ))}
                         </tbody>
                     </table>
-                </div>
+                </div> */}
                 <div className="pt-4">
                     <form onSubmit={handleSubmit}>
                         <div className="space-y-4">
