@@ -81,7 +81,7 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Lieu Leaves</h1>
                     <Button asChild>
-                        <Link href={route('lieu-leaves.create')}>Create Lieu Leave</Link>
+                        <Link href={route('lieu-leaves.create')}>Grant Lieu Leave</Link>
                     </Button>
                 </div>
 
