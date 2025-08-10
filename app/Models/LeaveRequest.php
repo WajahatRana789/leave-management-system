@@ -39,4 +39,9 @@ class LeaveRequest extends Model
     {
         return $this->belongsTo(User::class, 'reviewed_by');
     }
+
+    public function lieuOff()
+    {
+        return $this->belongsTo(LieuOff::class, 'lieu_off_id');
+    }
 }

@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { Head, Link, router } from '@inertiajs/react';
-import { ArrowLeft, CalendarDays, Clock, FileText, User, X } from 'lucide-react';
+import { ArrowLeft, CalendarDays, Clock, FileText, Gift, User, X } from 'lucide-react';
 
 interface User {
     id: number;
@@ -10,9 +10,22 @@ interface User {
 
 interface LeaveType {
     name: string;
+    key?: string; // added so we can check if it's 'lieu_leave'
     description?: string;
 }
 
+interface GrantedByUser {
+    id: number;
+    name: string;
+}
+
+interface LieuOff {
+    id: number;
+    granted_by_user?: GrantedByUser;
+    work_date: string;
+    expiry_date: string;
+    remarks?: string;
+}
 interface LeaveRequest {
     id: number;
     user: User;
@@ -27,6 +40,7 @@ interface LeaveRequest {
     remarks?: string;
     created_at: string;
     updated_at: string;
+    lieu_off?: LieuOff;
 }
 
 interface Props {
@@ -117,6 +131,38 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                     </div>
                                 </dl>
                             </div>
+
+                            {/* Show Lieu Off details if applicable */}
+                            {request.leave_type.key === 'lieu_leave' && request.lieu_off && (
+                                <div>
+                                    <h3 className="flex items-center text-lg font-medium text-gray-900">
+                                        <Gift className="mr-2 h-5 w-5 text-gray-400" />
+                                        Lieu Off Details
+                                    </h3>
+                                    <dl className="mt-2 space-y-3">
+                                        <div className="flex justify-between">
+                                            <dt className="text-sm font-medium text-gray-500">Work Date</dt>
+                                            <dd className="text-sm text-gray-900">{new Date(request.lieu_off.work_date).toLocaleDateString()}</dd>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <dt className="text-sm font-medium text-gray-500">Expiry Date</dt>
+                                            <dd className="text-sm text-gray-900">{new Date(request.lieu_off.expiry_date).toLocaleDateString()}</dd>
+                                        </div>
+                                        {request.lieu_off.granted_by_user && (
+                                            <div className="flex justify-between">
+                                                <dt className="text-sm font-medium text-gray-500">Granted By</dt>
+                                                <dd className="text-sm text-gray-900">{request.lieu_off.granted_by_user.name}</dd>
+                                            </div>
+                                        )}
+                                        {request.lieu_off.remarks && (
+                                            <div className="flex flex-col">
+                                                <dt className="text-sm font-medium text-gray-500">Remarks</dt>
+                                                <dd className="mt-1 rounded text-sm text-gray-700">{request.lieu_off.remarks}</dd>
+                                            </div>
+                                        )}
+                                    </dl>
+                                </div>
+                            )}
                         </div>
 
                         <div className="space-y-6">

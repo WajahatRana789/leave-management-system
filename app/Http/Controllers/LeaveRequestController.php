@@ -93,6 +93,13 @@ class LeaveRequestController extends Controller
             'user:id,name'
         ]);
 
+        // If it's a lieu leave, load the associated lieu_off and grantedByUser
+        if ($leaveRequest->leaveType->key === 'lieu_leave') {
+            $leaveRequest->load([
+                'lieuOff.grantedByUser:id,name'
+            ]);
+        }
+
         return inertia('leave-requests/show', [
             'request' => $leaveRequest,
             'canDelete' => $leaveRequest->status === 'pending',
