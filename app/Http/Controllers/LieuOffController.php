@@ -110,4 +110,47 @@ class LieuOffController extends Controller
         // 7. Redirect success
         return redirect()->route('lieu-leaves.index')->with('success', 'Lieu leave granted successfully.');
     }
+
+    public function destroy(LieuOff $lieuOff)
+    {
+        $authUser = auth()->user();
+
+        // 1. Authorize
+        if (!in_array($authUser->role, ['manager', 'admin', 'super_admin'])) {
+            abort(403, 'You are not authorized to delete lieu leave.');
+        }
+
+        // 2. Check if record exists and is available
+        $query = LieuOff::where('id', $lieuOff->id)
+            ->where('status', 'available');
+
+        // 3. If user is manager, restrict to their team
+        if ($authUser->role === 'manager') {
+            $query->whereHas('user', function ($q) use ($authUser) {
+                $q->whereHas('shift', function ($q) use ($authUser) {
+                    $q->where('manager_id', $authUser->id);
+                });
+            });
+        }
+
+        $lieuOff = $query->first();
+
+        if (!$lieuOff) {
+            return redirect()->back()
+                ->with('error', 'Record not found or cannot be deleted.');
+        }
+
+        // 4. Check if linked to any leave request
+        // if ($lieuOff->leaveRequests()->exists()) {
+        //     return redirect()->back()
+        //         ->with('error', 'This Lieu Off is already used in a leave request and cannot be deleted.');
+        // }
+
+        // 5. Delete the record
+        $lieuOff->delete();
+
+        // 6. Redirect with success message
+        return redirect()->route('lieu-leaves.index')
+            ->with('success', 'Lieu Off deleted successfully.');
+    }
 }

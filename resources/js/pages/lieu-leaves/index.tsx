@@ -1,8 +1,20 @@
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { Pencil, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,39 +43,68 @@ interface LieuLeavesProps {
     };
 }
 
-const columns: ColumnDef<LieuLeave>[] = [
-    { accessorKey: 'user.name', header: 'Employee', cell: ({ row }) => row.original.user?.name || '-' },
-    { accessorKey: 'granted_by_user.name', header: 'Granted By', cell: ({ row }) => row.original.granted_by_user?.name || '-' },
-    { accessorKey: 'work_date', header: 'Work Date' },
-    { accessorKey: 'expiry_date', header: 'Expiry Date' },
-    { accessorKey: 'status', header: 'Status' },
-    {
-        id: 'actions',
-        header: 'Actions',
-        cell: ({ row }) => {
-            const { auth } = usePage().props as any;
-            const lieuLeave = row.original;
-
-            const handleDelete = () => {
-                if (!confirm(`Delete lieu leave for "${lieuLeave.user?.name}"?`)) return;
-                router.delete(route('lieu-leaves.destroy', lieuLeave.id));
-            };
-
-            // Only admin & super_admin can delete
-            if (!['admin', 'super_admin'].includes(auth.user.role)) return null;
-
-            return (
-                <div className="flex items-center gap-2">
-                    <Button size="sm" variant="destructive" onClick={handleDelete}>
-                        Delete
-                    </Button>
-                </div>
-            );
-        },
-    },
-];
-
 export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
+    const [deleteId, setDeleteId] = useState<number | null>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const { auth } = usePage().props as any;
+
+    const columns: ColumnDef<LieuLeave>[] = [
+        { accessorKey: 'user.name', header: 'Employee', cell: ({ row }) => row.original.user?.name || '-' },
+        { accessorKey: 'granted_by_user.name', header: 'Granted By', cell: ({ row }) => row.original.granted_by_user?.name || '-' },
+        { accessorKey: 'work_date', header: 'Work Date' },
+        { accessorKey: 'expiry_date', header: 'Expiry Date' },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            cell: ({ row }) => {
+                const status = row.original.status;
+                const statusColors = {
+                    available: 'bg-green-100 text-green-800',
+                    used: 'bg-blue-100 text-blue-800',
+                    expired: 'bg-gray-100 text-gray-800',
+                };
+                return (
+                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${statusColors[status]}`}>
+                        {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </span>
+                );
+            },
+        },
+        {
+            id: 'actions',
+            header: 'Actions',
+            cell: ({ row }) => {
+                const lieuLeave = row.original;
+                const canEdit = ['manager', 'admin', 'super_admin'].includes(auth.user.role);
+                const canDelete = ['manager', 'admin', 'super_admin'].includes(auth.user.role) && lieuLeave.status === 'available';
+
+                return (
+                    <div className="flex items-center gap-2">
+                        {canEdit && (
+                            <Button size="sm" variant="outline" asChild>
+                                <Link href={route('lieu-leaves.edit', lieuLeave.id)}>
+                                    <Pencil className="h-4 w-4" />
+                                </Link>
+                            </Button>
+                        )}
+                        {canDelete && (
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => {
+                                    setDeleteId(lieuLeave.id);
+                                    setIsDeleteDialogOpen(true);
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4 text-white" />
+                            </Button>
+                        )}
+                    </div>
+                );
+            },
+        },
+    ];
+
     const table = useReactTable({
         data: lieuLeaves.data,
         columns,
@@ -74,15 +115,32 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
         if (url) router.visit(url);
     };
 
+    const handleDelete = () => {
+        if (!deleteId) return;
+
+        router.delete(route('lieu-leaves.destroy', deleteId), {
+            onSuccess: () => {
+                setIsDeleteDialogOpen(false);
+                setDeleteId(null);
+            },
+            onError: () => {
+                setIsDeleteDialogOpen(false);
+                setDeleteId(null);
+            },
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Lieu Leaves" />
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Lieu Leaves</h1>
-                    <Button asChild>
-                        <Link href={route('lieu-leaves.create')}>Grant Lieu Leave</Link>
-                    </Button>
+                    {['admin', 'super_admin'].includes(auth.user.role) && (
+                        <Button asChild>
+                            <Link href={route('lieu-leaves.create')}>Grant Lieu Leave</Link>
+                        </Button>
+                    )}
                 </div>
 
                 <div className="mt-2 text-sm text-gray-600">Total records: {lieuLeaves.total}</div>
@@ -188,6 +246,24 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Delete Confirmation Dialog */}
+            <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Are you sure you want to delete this lieu leave?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete the lieu leave record.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }

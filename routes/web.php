@@ -60,6 +60,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/lieu-leaves', [LieuOffController::class, 'index'])->name('lieu-leaves.index');
     Route::get('/lieu-leaves/create', [LieuOffController::class, 'create'])->name('lieu-leaves.create');
     Route::post('/lieu-leaves', [LieuOffController::class, 'store'])->name('lieu-leaves.store');
+    Route::get('/lieu-leaves/{lieuOff}/edit', [LieuOffController::class, 'edit'])->name('lieu-leaves.edit');
+    Route::delete('/lieu-leaves/{lieuOff}', [LieuOffController::class, 'destroy'])->name('lieu-leaves.destroy');
 
     // Regular user routes
     Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
