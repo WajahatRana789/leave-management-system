@@ -22,7 +22,7 @@ export default function EmployeeDashboard() {
         calendarLeaves: LeaveRequest[];
         teamCalendarLeaves: LeaveRequest[];
     };
-    console.log(lieuOffBalance);
+
     const [showCalendar, setShowCalendar] = useState(false);
     const pendingRequests = recentLeaves.filter((r) => r.status === 'pending');
     const oldestPending = pendingRequests.length ? Math.min(...pendingRequests.map((r) => new Date(r.from_date).getTime())) : null;
