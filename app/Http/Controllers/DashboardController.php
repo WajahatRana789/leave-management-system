@@ -28,11 +28,14 @@ class DashboardController extends Controller
             ->groupBy('leave_type_id')
             ->pluck('used', 'leave_type_id');
 
-        $leaveBalances = $leaveTypes->map(function ($type) use ($usedDays) {
+        $leaveBalances = $leaveTypes->reject(function ($type) {
+            return $type->key === 'lieu_leave';
+        })->map(function ($type) use ($usedDays) {
             $used = $usedDays[$type->id] ?? 0;
             return [
                 'id' => $type->id,
                 'name' => $type->name,
+                'key' => $type->key,
                 'default_days' => $type->default_days,
                 'used_days' => $used,
                 'remaining_days' => max(0, $type->default_days - $used),
