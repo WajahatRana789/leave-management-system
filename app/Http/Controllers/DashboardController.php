@@ -16,11 +16,14 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $today = Carbon::today();
+        $currentYear = $today->year;
 
         // Leave balance by type
         $leaveTypes = LeaveType::all();
         $usedDays = LeaveRequest::where('user_id', $user->id)
             ->where('status', 'approved')
+            ->whereYear('from_date', $currentYear)
+            ->whereYear('to_date', $currentYear)
             ->select('leave_type_id', DB::raw('SUM(total_days) as used'))
             ->groupBy('leave_type_id')
             ->pluck('used', 'leave_type_id');
@@ -36,9 +39,10 @@ class DashboardController extends Controller
             ];
         });
 
-        // Recent applications
+        // Recent applications (current year only)
         $recentLeaves = LeaveRequest::with('leaveType')
             ->where('user_id', $user->id)
+            ->whereYear('created_at', $currentYear)
             ->latest()
             ->take(5)
             ->get();
@@ -54,15 +58,19 @@ class DashboardController extends Controller
         // Shift and manager info
         $shift = Shift::with('manager')->find($user->shift_id);
 
-        // Personal leaves for calendar
+        // Personal leaves for calendar (current year only)
         $calendarLeaves = LeaveRequest::with('leaveType')
             ->where('user_id', $user->id)
+            ->whereYear('from_date', $currentYear)
+            ->whereYear('to_date', $currentYear)
             ->get();
 
-        // Team leaves for calendar (same shift, excluding current user)
+        // Team leaves for calendar (same shift, excluding current user, current year only)
         $teamCalendarLeaves = LeaveRequest::with(['user', 'leaveType'])
             ->whereHas('user', fn($q) => $q->where('shift_id', $user->shift_id)->where('id', '!=', $user->id))
             ->whereIn('status', ['approved', 'pending']) // Only show approved/pending
+            ->whereYear('from_date', $currentYear)
+            ->whereYear('to_date', $currentYear)
             ->get()
             ->map(function ($leave) {
                 return [
@@ -85,6 +93,7 @@ class DashboardController extends Controller
             });
 
         return Inertia::render('dashboards/employee-dashboard', [
+            'today' => $today->format('D d M, Y'),
             'leaveBalances' => $leaveBalances,
             'recentLeaves' => $recentLeaves,
             'teamOnLeaveToday' => $teamOnLeaveToday,

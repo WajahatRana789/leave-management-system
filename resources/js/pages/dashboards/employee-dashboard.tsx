@@ -13,7 +13,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EmployeeDashboard() {
-    const { leaveBalances, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves, teamCalendarLeaves } = usePage().props as {
+    const { today, leaveBalances, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves, teamCalendarLeaves } = usePage().props as {
         leaveBalances: LeaveBalance[];
         recentLeaves: LeaveRequest[];
         teamOnLeaveToday: TeamMemberOnLeave[];
@@ -35,6 +35,7 @@ export default function EmployeeDashboard() {
             <Head title="Employee Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
+                    <div className="mb-0 text-sm text-gray-600">{today}</div>
                     <div className="flex items-center justify-between">
                         <h1 className="text-2xl font-bold">Employee Dashboard</h1>
                         <div className="flex flex-wrap gap-4">
