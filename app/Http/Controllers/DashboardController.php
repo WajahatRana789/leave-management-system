@@ -18,8 +18,8 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $currentYear = $today->year;
 
-        // Leave balance by type
-        $leaveTypes = LeaveType::all();
+        // Regular leave balance by type (excluding lieu_leave)
+        $leaveTypes = LeaveType::where('key', '!=', 'lieu_leave')->get();
         $usedDays = LeaveRequest::where('user_id', $user->id)
             ->where('status', 'approved')
             ->whereYear('from_date', $currentYear)
@@ -28,9 +28,7 @@ class DashboardController extends Controller
             ->groupBy('leave_type_id')
             ->pluck('used', 'leave_type_id');
 
-        $leaveBalances = $leaveTypes->reject(function ($type) {
-            return $type->key === 'lieu_leave';
-        })->map(function ($type) use ($usedDays) {
+        $leaveBalances = $leaveTypes->map(function ($type) use ($usedDays) {
             $used = $usedDays[$type->id] ?? 0;
             return [
                 'id' => $type->id,
@@ -41,6 +39,27 @@ class DashboardController extends Controller
                 'remaining_days' => max(0, $type->default_days - $used),
             ];
         });
+
+        // Calculate lieu_off balance separately
+        $lieuOffBalance = [
+            'available' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'available')
+                ->where('expiry_date', '>=', $today)
+                ->count(),
+            'pending' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'pending_approval')
+                ->count(),
+            'expired' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'expired')
+                ->count(),
+            'used' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'used')
+                ->count(),
+        ];
 
         // Recent applications (current year only)
         $recentLeaves = LeaveRequest::with('leaveType')
@@ -61,17 +80,17 @@ class DashboardController extends Controller
         // Shift and manager info
         $shift = Shift::with('manager')->find($user->shift_id);
 
-        // Personal leaves for calendar (current year only)
+        // Personal leaves for calendar
         $calendarLeaves = LeaveRequest::with('leaveType')
             ->where('user_id', $user->id)
             ->whereYear('from_date', $currentYear)
             ->whereYear('to_date', $currentYear)
             ->get();
 
-        // Team leaves for calendar (same shift, excluding current user, current year only)
+        // Team leaves for calendar
         $teamCalendarLeaves = LeaveRequest::with(['user', 'leaveType'])
             ->whereHas('user', fn($q) => $q->where('shift_id', $user->shift_id)->where('id', '!=', $user->id))
-            ->whereIn('status', ['approved', 'pending']) // Only show approved/pending
+            ->whereIn('status', ['approved', 'pending'])
             ->whereYear('from_date', $currentYear)
             ->whereYear('to_date', $currentYear)
             ->get()
@@ -98,6 +117,7 @@ class DashboardController extends Controller
         return Inertia::render('dashboards/employee-dashboard', [
             'today' => $today->format('D d M, Y'),
             'leaveBalances' => $leaveBalances,
+            'lieuOffBalance' => $lieuOffBalance,
             'recentLeaves' => $recentLeaves,
             'teamOnLeaveToday' => $teamOnLeaveToday,
             'calendarLeaves' => $calendarLeaves,

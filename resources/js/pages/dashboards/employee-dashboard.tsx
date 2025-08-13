@@ -13,7 +13,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EmployeeDashboard() {
-    const { today, leaveBalances, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves, teamCalendarLeaves } = usePage().props as {
+    const { today, leaveBalances, lieuOffBalance, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves, teamCalendarLeaves } = usePage()
+        .props as {
         leaveBalances: LeaveBalance[];
         recentLeaves: LeaveRequest[];
         teamOnLeaveToday: TeamMemberOnLeave[];
@@ -21,7 +22,7 @@ export default function EmployeeDashboard() {
         calendarLeaves: LeaveRequest[];
         teamCalendarLeaves: LeaveRequest[];
     };
-
+    console.log(lieuOffBalance);
     const [showCalendar, setShowCalendar] = useState(false);
     const pendingRequests = recentLeaves.filter((r) => r.status === 'pending');
     const oldestPending = pendingRequests.length ? Math.min(...pendingRequests.map((r) => new Date(r.from_date).getTime())) : null;
@@ -71,6 +72,7 @@ export default function EmployeeDashboard() {
                     <section className="space-y-2">
                         <h2 className="text-lg font-semibold">Leave Balance</h2>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                            {/* Regular Leave Balances */}
                             {leaveBalances.map((leave) => {
                                 const percent = leave.default_days ? (leave.remaining_days / leave.default_days) * 100 : 0;
                                 return (
@@ -87,6 +89,32 @@ export default function EmployeeDashboard() {
                                     </div>
                                 );
                             })}
+
+                            {/* Lieu Off Balance Card */}
+                            <Link
+                                href={route('my-lieu-offs.index')}
+                                className="block rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition hover:border-blue-300 hover:shadow-md"
+                            >
+                                <p className="mb-1 text-sm text-gray-600">Lieu Leave</p>
+                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div className="flex items-center justify-between rounded border border-green-200 bg-green-50 px-2 py-1">
+                                        <span className="text-green-700">Available</span>
+                                        <span className="font-bold text-green-800">{lieuOffBalance.available}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between rounded border border-yellow-200 bg-yellow-50 px-2 py-1">
+                                        <span className="text-yellow-700">Pending</span>
+                                        <span className="font-bold text-yellow-800">{lieuOffBalance.pending}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between rounded border border-red-200 bg-red-50 px-2 py-1">
+                                        <span className="text-red-700">Expired</span>
+                                        <span className="font-bold text-red-800">{lieuOffBalance.expired}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between rounded border border-blue-200 bg-blue-50 px-2 py-1">
+                                        <span className="text-blue-700">Used</span>
+                                        <span className="font-bold text-blue-800">{lieuOffBalance.used}</span>
+                                    </div>
+                                </div>
+                            </Link>
                         </div>
                     </section>
 
