@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\Shift;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -134,7 +135,109 @@ class DashboardController extends Controller
 
     public function managerDashboard(Request $request)
     {
-        return Inertia::render('dashboards/manager-dashboard', []);
+        $user = $request->user();
+        $today = Carbon::today();
+        $currentYear = $today->year;
+
+        // Get the shift this manager manages
+        $managedShift = Shift::where('manager_id', $user->id)->first();
+
+        if (!$managedShift) {
+            return Inertia::render('dashboards/manager-dashboard', [
+                'error' => 'You are not assigned as a manager for any shift',
+                'today' => $today->format('D d M, Y'),
+                'teamCount' => 0,
+                'pendingRequests' => [],
+                'teamLeaveStats' => [
+                    'total_requests' => 0,
+                    'approved' => 0,
+                    'rejected' => 0,
+                    'pending' => 0,
+                ],
+                'teamOnLeaveToday' => [],
+                'upcomingLeaves' => [],
+                'teamCalendarLeaves' => [],
+            ]);
+        }
+
+        // Get all users in this shift (excluding the manager)
+        $managedUsers = User::where('shift_id', $managedShift->id)
+            ->where('id', '!=', $user->id)
+            ->get();
+        $managedUserIds = $managedUsers->pluck('id');
+
+        // Pending leave requests for approval
+        $pendingRequests = LeaveRequest::with(['user', 'leaveType'])
+            ->whereIn('user_id', $managedUserIds)
+            ->where('status', 'pending')
+            ->orderBy('created_at')
+            ->get();
+
+        // Team leave statistics
+        $teamLeaveStats = LeaveRequest::whereIn('user_id', $managedUserIds)
+            ->whereYear('created_at', $currentYear)
+            ->select(
+                DB::raw('count(*) as total_requests'),
+                DB::raw('sum(case when status = "approved" then 1 else 0 end) as approved'),
+                DB::raw('sum(case when status = "rejected" then 1 else 0 end) as rejected'),
+                DB::raw('sum(case when status = "pending" then 1 else 0 end) as pending')
+            )
+            ->first();
+
+        // Team members on leave today
+        $teamOnLeaveToday = LeaveRequest::with(['user', 'leaveType'])
+            ->whereIn('user_id', $managedUserIds)
+            ->whereDate('from_date', '<=', $today)
+            ->whereDate('to_date', '>=', $today)
+            ->where('status', 'approved')
+            ->get();
+
+        // Upcoming leaves (next 7 days)
+        $upcomingLeaves = LeaveRequest::with(['user', 'leaveType'])
+            ->whereIn('user_id', $managedUserIds)
+            ->whereDate('from_date', '>=', $today)
+            ->whereDate('from_date', '<=', $today->copy()->addDays(7))
+            ->whereIn('status', ['approved', 'pending'])
+            ->orderBy('from_date')
+            ->get();
+
+        // Team leave calendar data
+        $teamCalendarLeaves = LeaveRequest::with(['user', 'leaveType'])
+            ->whereIn('user_id', $managedUserIds)
+            ->whereYear('from_date', $currentYear)
+            ->whereYear('to_date', $currentYear)
+            ->whereIn('status', ['approved', 'pending'])
+            ->get()
+            ->map(function ($leave) {
+                return [
+                    'id' => $leave->id,
+                    'user_id' => $leave->user_id,
+                    'user' => ['name' => $leave->user->name],
+                    'leave_type_id' => $leave->leave_type_id,
+                    'leave_type' => ['name' => $leave->leaveType->name],
+                    'from_date' => $leave->from_date,
+                    'to_date' => $leave->to_date,
+                    'total_days' => $leave->total_days,
+                    'reason' => $leave->reason,
+                    'status' => $leave->status,
+                    'reviewed_by' => $leave->reviewed_by,
+                    'reviewed_at' => $leave->reviewed_at,
+                    'remarks' => $leave->remarks,
+                    'created_at' => $leave->created_at,
+                    'updated_at' => $leave->updated_at,
+                ];
+            });
+
+        return Inertia::render('dashboards/manager-dashboard', [
+            'today' => $today->format('D d M, Y'),
+            'shiftName' => $managedShift->name,
+            'teamCount' => $managedUsers->count(),
+            'pendingRequests' => $pendingRequests,
+            'teamLeaveStats' => $teamLeaveStats,
+            'teamOnLeaveToday' => $teamOnLeaveToday,
+            'upcomingLeaves' => $upcomingLeaves,
+            'teamCalendarLeaves' => $teamCalendarLeaves,
+        ]);
     }
 
     public function adminDashboard(Request $request)
