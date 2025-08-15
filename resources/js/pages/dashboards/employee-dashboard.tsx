@@ -13,15 +13,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EmployeeDashboard() {
-    const { today, leaveBalances, lieuOffBalance, recentLeaves, teamOnLeaveToday, shiftInfo, calendarLeaves, teamCalendarLeaves } = usePage()
-        .props as {
-        leaveBalances: LeaveBalance[];
-        recentLeaves: LeaveRequest[];
-        teamOnLeaveToday: TeamMemberOnLeave[];
-        shiftInfo: ShiftInfo | null;
-        calendarLeaves: LeaveRequest[];
-        teamCalendarLeaves: LeaveRequest[];
-    };
+    const { today, leaveBalances, lieuOffBalance, recentLeaves, teamOnLeaveToday, shiftInfo, designationInfo, calendarLeaves, teamCalendarLeaves } =
+        usePage().props as {
+            leaveBalances: LeaveBalance[];
+            lieuOffBalance: LieuOffBalance[];
+            recentLeaves: LeaveRequest[];
+            teamOnLeaveToday: TeamMemberOnLeave[];
+            shiftInfo: ShiftInfo | null;
+            designationInfo: DesignationInfo | null;
+            calendarLeaves: LeaveRequest[];
+            teamCalendarLeaves: LeaveRequest[];
+        };
 
     const [showCalendar, setShowCalendar] = useState(false);
     const pendingRequests = recentLeaves.filter((r) => r.status === 'pending');
@@ -198,14 +200,19 @@ export default function EmployeeDashboard() {
 
                     {shiftInfo && (
                         <section>
-                            <h2 className="mb-2 text-lg font-semibold">Shift & Manager Info</h2>
+                            <h2 className="mb-2 text-lg font-semibold">My Info</h2>
                             <div className="rounded-xl border bg-white p-4 shadow">
+                                {designationInfo && (
+                                    <p>
+                                        <strong>Designation:</strong> {designationInfo.title}
+                                    </p>
+                                )}
                                 <p>
                                     <strong>Shift:</strong> {shiftInfo.name}
                                 </p>
                                 {shiftInfo.manager && (
                                     <p>
-                                        <strong>Manager:</strong> {shiftInfo.manager.name} ({shiftInfo.manager.email})
+                                        <strong>Shift Incharge:</strong> {shiftInfo.manager.name} ({shiftInfo.manager.email})
                                     </p>
                                 )}
                             </div>

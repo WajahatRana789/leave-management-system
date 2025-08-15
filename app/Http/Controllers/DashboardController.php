@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Designation;
 use App\Models\LeaveRequest;
 use App\Models\LeaveType;
 use App\Models\Shift;
@@ -15,7 +16,7 @@ class DashboardController extends Controller
 {
     public function employeeDashboard(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load(['designation']);
         $today = Carbon::today();
         $currentYear = $today->year;
 
@@ -129,6 +130,10 @@ class DashboardController extends Controller
                     'name' => $shift->manager?->name,
                     'email' => $shift->manager?->email,
                 ],
+            ] : null,
+            'designationInfo' => $user->designation ? [
+                'id' => $user->designation->id,
+                'title' => $user->designation->title,
             ] : null,
         ]);
     }
