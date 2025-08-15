@@ -20,6 +20,9 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', ['employee', 'manager', 'admin', 'super_admin'])->default('employee');
             $table->unsignedBigInteger('shift_id')->nullable();
+            $table->unsignedBigInteger('designation_id')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('whatsapp')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

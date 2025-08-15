@@ -14,17 +14,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'code' => 'SP001',
-            'name' => 'Super Admin',
-            'email' => 'superadmin@test.com',
-            'role' => 'super_admin',
-            'password' => bcrypt('password')
-        ]);
-
         $this->call([
+            DesignationSeeder::class,
             LeaveTypeSeeder::class,
             ShiftSeeder::class,
             UserSeeder::class,

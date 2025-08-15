@@ -67,7 +67,7 @@ export function AppSidebar() {
     // Determine role-specific items
     const roleSpecificItems = [];
 
-    if (user.role === 'super_admin' || user.role === 'admin') {
+    if (user.role === 'super_admin') {
         roleSpecificItems.push(...adminNavItems);
     }
 

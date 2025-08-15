@@ -24,6 +24,9 @@ class User extends Authenticatable
         'password',
         'shift_id',
         'role',
+        'designation_id',
+        'phone',
+        'whatsapp'
     ];
 
     /**
@@ -62,5 +65,10 @@ class User extends Authenticatable
     public function hasRole(string $role): bool
     {
         return $this->role === $role;
+    }
+
+    public function designation()
+    {
+        return $this->belongsTo(Designation::class);
     }
 }

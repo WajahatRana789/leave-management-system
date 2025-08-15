@@ -16,7 +16,6 @@ class ShiftSeeder extends Seeder
         Shift::insert([
             ['name' => 'Morning', 'manager_id' => null, 'created_at' => now(), 'updated_at' => now()],
             ['name' => 'Evening', 'manager_id' => null, 'created_at' => now(), 'updated_at' => now()],
-            ['name' => 'Night', 'manager_id' => null, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }
