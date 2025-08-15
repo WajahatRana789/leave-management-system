@@ -118,6 +118,7 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboards/employee-dashboard', [
             'today' => $today->format('D d M, Y'),
+            'user' => $user,
             'leaveBalances' => $leaveBalances,
             'lieuOffBalance' => $lieuOffBalance,
             'recentLeaves' => $recentLeaves,

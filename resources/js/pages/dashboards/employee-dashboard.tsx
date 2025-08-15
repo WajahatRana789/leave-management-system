@@ -2,7 +2,8 @@ import EmployeeLeaveCalendar from '@/components/EmployeeLeaveCalendar';
 import AppLayout from '@/layouts/app-layout';
 import { LeaveBalance, LeaveRequest, ShiftInfo, TeamMemberOnLeave, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { CalendarDays, Clock, FileText, PlusCircle, Users } from 'lucide-react';
+import { Briefcase, CalendarDays, Clock, FileText, Mail, MessageSquare, Phone, PlusCircle, User, Users } from 'lucide-react';
+
 import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -13,17 +14,27 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function EmployeeDashboard() {
-    const { today, leaveBalances, lieuOffBalance, recentLeaves, teamOnLeaveToday, shiftInfo, designationInfo, calendarLeaves, teamCalendarLeaves } =
-        usePage().props as {
-            leaveBalances: LeaveBalance[];
-            lieuOffBalance: LieuOffBalance[];
-            recentLeaves: LeaveRequest[];
-            teamOnLeaveToday: TeamMemberOnLeave[];
-            shiftInfo: ShiftInfo | null;
-            designationInfo: DesignationInfo | null;
-            calendarLeaves: LeaveRequest[];
-            teamCalendarLeaves: LeaveRequest[];
-        };
+    const {
+        today,
+        user,
+        leaveBalances,
+        lieuOffBalance,
+        recentLeaves,
+        teamOnLeaveToday,
+        shiftInfo,
+        designationInfo,
+        calendarLeaves,
+        teamCalendarLeaves,
+    } = usePage().props as {
+        leaveBalances: LeaveBalance[];
+        lieuOffBalance: LieuOffBalance[];
+        recentLeaves: LeaveRequest[];
+        teamOnLeaveToday: TeamMemberOnLeave[];
+        shiftInfo: ShiftInfo | null;
+        designationInfo: DesignationInfo | null;
+        calendarLeaves: LeaveRequest[];
+        teamCalendarLeaves: LeaveRequest[];
+    };
 
     const [showCalendar, setShowCalendar] = useState(false);
     const pendingRequests = recentLeaves.filter((r) => r.status === 'pending');
@@ -198,26 +209,70 @@ export default function EmployeeDashboard() {
                         </div>
                     </section>
 
-                    {shiftInfo && (
-                        <section>
-                            <h2 className="mb-2 text-lg font-semibold">My Info</h2>
-                            <div className="rounded-xl border bg-white p-4 shadow">
-                                {designationInfo && (
-                                    <p>
-                                        <strong>Designation:</strong> {designationInfo.title}
-                                    </p>
-                                )}
-                                <p>
-                                    <strong>Shift:</strong> {shiftInfo.name}
+                    <section>
+                        <h2 className="mb-2 text-lg font-semibold">My Info</h2>
+                        <div className="space-y-2 rounded-xl border bg-white p-4 shadow">
+                            <p className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-gray-500" />
+                                <span>
+                                    <strong>Name:</strong> {user.name}
+                                </span>
+                            </p>
+
+                            <p className="flex items-center gap-2">
+                                <Mail className="h-4 w-4 text-gray-500" />
+                                <span>
+                                    <strong>Email:</strong> {user.email}
+                                </span>
+                            </p>
+
+                            {user.phone && (
+                                <p className="flex items-center gap-2">
+                                    <Phone className="h-4 w-4 text-gray-500" />
+                                    <span>
+                                        <strong>Phone:</strong> {user.phone}
+                                    </span>
                                 </p>
-                                {shiftInfo.manager && (
-                                    <p>
-                                        <strong>Shift Incharge:</strong> {shiftInfo.manager.name} ({shiftInfo.manager.email})
+                            )}
+
+                            {user.whatsapp && (
+                                <p className="flex items-center gap-2">
+                                    <MessageSquare className="h-4 w-4 text-green-500" />
+                                    <span>
+                                        <strong>Whatsapp:</strong> {user.whatsapp}
+                                    </span>
+                                </p>
+                            )}
+
+                            {designationInfo && (
+                                <p className="flex items-center gap-2">
+                                    <Briefcase className="h-4 w-4 text-gray-500" />
+                                    <span>
+                                        <strong>Designation:</strong> {designationInfo.title}
+                                    </span>
+                                </p>
+                            )}
+
+                            {shiftInfo && (
+                                <>
+                                    <p className="flex items-center gap-2">
+                                        <Clock className="h-4 w-4 text-gray-500" />
+                                        <span>
+                                            <strong>Shift:</strong> {shiftInfo.name}
+                                        </span>
                                     </p>
-                                )}
-                            </div>
-                        </section>
-                    )}
+                                    {shiftInfo.manager && (
+                                        <p className="flex items-center gap-2">
+                                            <User className="h-4 w-4 text-gray-500" />
+                                            <span>
+                                                <strong>Shift Incharge:</strong> {shiftInfo.manager.name} ({shiftInfo.manager.email})
+                                            </span>
+                                        </p>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </section>
                 </div>
             </div>
         </AppLayout>
