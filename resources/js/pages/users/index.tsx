@@ -20,6 +20,9 @@ interface User {
     shift?: {
         name: string;
     };
+    designation?: {
+        title: string;
+    };
 }
 
 interface UsersProps {
@@ -36,6 +39,13 @@ interface UsersProps {
 const columns: ColumnDef<User>[] = [
     { accessorKey: 'name', header: 'Name' },
     { accessorKey: 'email', header: 'Email' },
+    { accessorKey: 'phone', header: 'Phone' },
+    { accessorKey: 'whatsapp', header: 'Whatsapp' },
+    {
+        accessorKey: 'designation.title',
+        header: 'Designation',
+        cell: ({ row }) => row.original.designation?.title || '-',
+    },
     { accessorKey: 'role', header: 'Role' },
     {
         accessorKey: 'shift.name',

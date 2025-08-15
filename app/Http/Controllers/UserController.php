@@ -11,7 +11,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::query()->with('shift');
+        $query = User::query()->with(['shift', 'designation']);
 
         // Role-based filtering
         if (auth()->user()->role === 'manager') {
