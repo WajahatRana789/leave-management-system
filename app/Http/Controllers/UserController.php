@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Designation;
 use App\Models\Shift;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -38,6 +39,7 @@ class UserController extends Controller
     {
         return inertia('users/create', [
             'shifts' => Shift::select('id', 'name')->get(),
+            'designations' => Designation::select('id', 'title')->get()
         ]);
     }
 
@@ -50,6 +52,9 @@ class UserController extends Controller
             'password' => 'required|string|min:6',
             'role' => 'required|in:employee,manager,admin',
             'shift_id' => 'nullable|exists:shifts,id',
+            'designation_id' => 'nullable|exists:designations,id',
+            'phone' => 'nullable|string',
+            'whatsapp' => 'nullable|string',
         ]);
 
         // Additional validation for roles
@@ -64,6 +69,9 @@ class UserController extends Controller
             'password' => bcrypt($validated['password']),
             'role' => $validated['role'],
             'shift_id' => $validated['shift_id'],
+            'designation_id' => $validated['designation_id'],
+            'phone' => $validated['phone'] ?? null,
+            'whatsapp' => $validated['whatsapp'] ?? null,
         ]);
 
         return redirect()->route('users.index')->with('success', 'User created successfully!');
@@ -72,8 +80,9 @@ class UserController extends Controller
     public function edit(User $user)
     {
         return inertia('users/edit', [
-            'user' => $user->load('shift'),
+            'user' => $user->load(['shift', 'designation']),
             'shifts' => Shift::select('id', 'name')->get(),
+            'designations' => Designation::select('id', 'title')->get()
         ]);
     }
 
@@ -86,6 +95,9 @@ class UserController extends Controller
             'password' => 'nullable|string|min:6',
             'role' => 'required|in:employee,manager,admin',
             'shift_id' => 'nullable|exists:shifts,id',
+            'designation_id' => 'nullable|exists:designations,id',
+            'phone' => 'nullable|string',
+            'whatsapp' => 'nullable|string',
         ]);
 
         // Require shift if not admin
@@ -99,6 +111,9 @@ class UserController extends Controller
             'email' => $validated['email'],
             'role' => $validated['role'],
             'shift_id' => $validated['shift_id'],
+            'designation_id' => $validated['designation_id'],
+            'phone' => $validated['phone'],
+            'whatsapp' => $validated['whatsapp'],
             'password' => $validated['password'] ? bcrypt($validated['password']) : $user->password,
         ]);
 

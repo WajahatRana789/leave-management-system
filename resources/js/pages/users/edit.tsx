@@ -3,12 +3,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { BreadcrumbItem, Shift, User } from '@/types';
+import { BreadcrumbItem, Designations, Shift, User } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 
 interface Props {
     user: User & { shift_id: number };
     shifts: Shift[];
+    designations: Designations[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -17,7 +18,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Edit User', href: '#' },
 ];
 
-export default function EditUser({ user, shifts }: Props) {
+export default function EditUser({ user, shifts, designations }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         code: user.code ?? '',
         name: user.name ?? '',
@@ -25,6 +26,9 @@ export default function EditUser({ user, shifts }: Props) {
         password: '',
         role: user.role ?? 'employee',
         shift_id: user.shift_id ? String(user.shift_id) : '',
+        designation_id: user.designation_id ? String(user.designation_id) : '',
+        phone: user.phone ?? '',
+        whatsapp: user.whatsapp ?? '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -105,6 +109,37 @@ export default function EditUser({ user, shifts }: Props) {
                                         </SelectContent>
                                     </Select>
                                     {errors.shift_id && <p className="mt-1 text-sm text-red-500">{errors.shift_id}</p>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="designation_id">Designation*</Label>
+                                    <Select value={data.designation_id} onValueChange={(val) => setData('designation_id', val)}>
+                                        <SelectTrigger id="designation" className="w-full">
+                                            <SelectValue placeholder="-- Choose Designation --" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {designations.map((designation) => (
+                                                <SelectItem key={designation.id} value={String(designation.id)}>
+                                                    {designation.title}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.designation_id && <p className="mt-1 text-sm text-red-500">{errors.designation_id}</p>}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="phone">Phone Number</Label>
+                                    <Input id="phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} />
+                                    {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="whatsapp">Whatsapp Number</Label>
+                                    <Input id="whatsapp" value={data.whatsapp} onChange={(e) => setData('whatsapp', e.target.value)} />
+                                    {errors.whatsapp && <p className="text-sm text-red-500">{errors.whatsapp}</p>}
                                 </div>
                             </div>
 

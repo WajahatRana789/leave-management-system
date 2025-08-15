@@ -3,11 +3,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem, Shift } from '@/types';
+import { type BreadcrumbItem, Designations, Shift } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 
 interface Props {
     shifts: Shift[];
+    designations: Designations[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,7 +17,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create User', href: 'javascript:void(0)' },
 ];
 
-export default function CreateUser({ shifts }: Props) {
+export default function CreateUser({ shifts, designations }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         code: '',
         name: '',
@@ -24,6 +25,9 @@ export default function CreateUser({ shifts }: Props) {
         password: '',
         role: 'employee',
         shift_id: '',
+        designation_id: '',
+        phone: '',
+        whatsapp: '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -104,6 +108,37 @@ export default function CreateUser({ shifts }: Props) {
                                         </SelectContent>
                                     </Select>
                                     {errors.shift_id && <p className="mt-1 text-sm text-red-500">{errors.shift_id}</p>}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="designation_id">Designation*</Label>
+                                    <Select value={data.designation_id} onValueChange={(val) => setData('designation_id', val)}>
+                                        <SelectTrigger id="designation" className="w-full">
+                                            <SelectValue placeholder="-- Choose Designation --" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {designations.map((designation) => (
+                                                <SelectItem key={designation.id} value={String(designation.id)}>
+                                                    {designation.title}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {errors.designation_id && <p className="mt-1 text-sm text-red-500">{errors.designation_id}</p>}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="phone">Phone Number</Label>
+                                    <Input id="phone" value={data.phone} onChange={(e) => setData('phone', e.target.value)} required />
+                                    {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                                </div>
+
+                                <div>
+                                    <Label htmlFor="whatsapp">Whatsapp Number</Label>
+                                    <Input id="whatsapp" value={data.whatsapp} onChange={(e) => setData('whatsapp', e.target.value)} required />
+                                    {errors.whatsapp && <p className="text-sm text-red-500">{errors.whatsapp}</p>}
                                 </div>
                             </div>
 
