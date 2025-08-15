@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import { Pencil, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
@@ -37,57 +37,61 @@ interface UsersProps {
     };
 }
 
-const columns: ColumnDef<User>[] = [
-    { accessorKey: 'name', header: 'Name' },
-    { accessorKey: 'email', header: 'Email' },
-    { accessorKey: 'phone', header: 'Phone' },
-    { accessorKey: 'whatsapp', header: 'Whatsapp' },
-    {
-        accessorKey: 'designation.title',
-        header: 'Designation',
-        cell: ({ row }) => row.original.designation?.title || '-',
-    },
-    { accessorKey: 'role', header: 'Role' },
-    {
-        accessorKey: 'shift.name',
-        header: 'Shift',
-        cell: ({ row }) => row.original.shift?.name || '-',
-    },
-    {
-        id: 'actions',
-        header: 'Actions',
-        cell: ({ row }) => {
-            const user = row.original;
-
-            const handleDelete = () => {
-                if (user.role === 'super_admin') {
-                    alert('Cannot delete super admin user');
-                    return;
-                }
-
-                if (confirm(`Are you sure you want to delete employee "${user.name}"?`)) {
-                    router.delete(route('users.destroy', user.id));
-                }
-            };
-
-            return (
-                <div className="flex items-center gap-2">
-                    <Button size="sm" variant="outline" asChild>
-                        <Link href={route('users.edit', user.id)}>
-                            <Pencil className="h-4 w-4" />
-                        </Link>
-                    </Button>
-                    <Button size="sm" variant="destructive" onClick={handleDelete} disabled={user.role === 'super_admin'}>
-                        <Trash2 className="h-4 w-4 text-white" />
-                    </Button>
-                </div>
-            );
-        },
-    },
-];
-
 export default function UsersPage({ users, filters }: UsersProps) {
+    const { user } = usePage().props.auth;
     const [search, setSearch] = useState(filters?.search || '');
+
+    const columns: ColumnDef<User>[] = [
+        { accessorKey: 'name', header: 'Name' },
+        { accessorKey: 'email', header: 'Email' },
+        { accessorKey: 'phone', header: 'Phone' },
+        { accessorKey: 'whatsapp', header: 'Whatsapp' },
+        {
+            accessorKey: 'designation.title',
+            header: 'Designation',
+            cell: ({ row }) => row.original.designation?.title || '-',
+        },
+        { accessorKey: 'role', header: 'Role' },
+        {
+            accessorKey: 'shift.name',
+            header: 'Shift',
+            cell: ({ row }) => row.original.shift?.name || '-',
+        },
+    ];
+
+    if (user.role === 'super_admin') {
+        columns.push({
+            id: 'actions',
+            header: 'Actions',
+            cell: ({ row }) => {
+                const user = row.original;
+
+                const handleDelete = () => {
+                    if (user.role === 'super_admin') {
+                        alert('Cannot delete super admin user');
+                        return;
+                    }
+
+                    if (confirm(`Are you sure you want to delete employee "${user.name}"?`)) {
+                        router.delete(route('users.destroy', user.id));
+                    }
+                };
+
+                return (
+                    <div className="flex items-center gap-2">
+                        <Button size="sm" variant="outline" asChild>
+                            <Link href={route('users.edit', user.id)}>
+                                <Pencil className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={handleDelete} disabled={user.role === 'super_admin'}>
+                            <Trash2 className="h-4 w-4 text-white" />
+                        </Button>
+                    </div>
+                );
+            },
+        });
+    }
 
     const table = useReactTable({
         data: users.data,
@@ -110,9 +114,13 @@ export default function UsersPage({ users, filters }: UsersProps) {
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Employees</h1>
-                    <Button asChild>
-                        <Link href={route('users.create')}>Create Employee</Link>
-                    </Button>
+                    {user.role === 'super_admin' && (
+                        <>
+                            <Button asChild>
+                                <Link href={route('users.create')}>Create Employee</Link>
+                            </Button>
+                        </>
+                    )}
                 </div>
 
                 <div className="mt-3 flex items-center justify-between">
