@@ -3,7 +3,8 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Search, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -85,7 +86,9 @@ const columns: ColumnDef<User>[] = [
     },
 ];
 
-export default function UsersPage({ users }: UsersProps) {
+export default function UsersPage({ users, filters }: UsersProps) {
+    const [search, setSearch] = useState(filters?.search || '');
+
     const table = useReactTable({
         data: users.data,
         columns,
@@ -94,6 +97,11 @@ export default function UsersPage({ users }: UsersProps) {
 
     const goToPage = (url: string | null) => {
         if (url) router.visit(url);
+    };
+
+    const handleSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get(route('users.index'), { search }, { preserveState: true, replace: true });
     };
 
     return (
@@ -107,7 +115,21 @@ export default function UsersPage({ users }: UsersProps) {
                     </Button>
                 </div>
 
-                <div className="mt-2 text-sm text-gray-600">Total records: {users.total}</div>
+                <div className="mt-3 flex items-center justify-between">
+                    <div className="text-sm text-gray-600">Total records: {users.total}</div>
+                    <form onSubmit={handleSearch} className="flex items-center gap-2">
+                        <input
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            placeholder="Search..."
+                            className="rounded border px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        />
+                        <Button type="submit" size="sm" variant="outline">
+                            <Search className="h-4 w-4" />
+                        </Button>
+                    </form>
+                </div>
 
                 <div className="mt-4">
                     <div className="overflow-x-auto rounded-xl border">

@@ -30,10 +30,24 @@ class UserController extends Controller
 
 
         // Server-side search
-        if ($request->has('search')) {
-            $query->where('name', 'like', "%{$request->search}%")
-                ->orWhere('email', 'like', "%{$request->search}%");
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('whatsapp', 'like', "%{$search}%")
+                    ->orWhere('role', 'like', "%{$search}%")
+                    ->orWhereHas('designation', function ($q) use ($search) {
+                        $q->where('title', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('shift', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%");
+                    });
+            });
         }
+
 
         // Pagination (15 items per page by default)
         $users = $query->paginate($request->per_page ?? 15);
