@@ -27,21 +27,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
         };
     })->name('dashboard');
 
-    // Dashboard routes
-    Route::get('/dashboard/employee', [DashboardController::class, 'employeeDashboard'])->name('employee.dashboard');
-    Route::get('/dashboard/manager', [DashboardController::class, 'managerDashboard'])->name('manager.dashboard');
-    Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
-    Route::get('/dashboard/superadmin', [DashboardController::class, 'superAdminDashboard'])->name('superadmin.dashboard');
+    Route::middleware(['role:super_admin'])->group(function () {
+        // Dashboard
+        Route::get('/dashboard/superadmin', [DashboardController::class, 'superAdminDashboard'])->name('superadmin.dashboard');
 
-    Route::get('/users', [UserController::class, 'index'])->name('users.index');
-
-    // Super Admin only routes
-    Route::middleware(['super_admin'])->group(function () {
+        // Users
         Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('/users', [UserController::class, 'store'])->name('users.store');
         Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
         Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+        // Shifts
         Route::get('/shifts', [ShiftController::class, 'index'])->name('shifts.index');
         Route::get('/shifts/create', [ShiftController::class, 'create'])->name('shifts.create');
         Route::post('/shifts', [ShiftController::class, 'store'])->name('shifts.store');
@@ -49,6 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/shifts/{shift}', [ShiftController::class, 'update'])->name('shifts.update');
         Route::delete('/shifts/{shift}', [ShiftController::class, 'destroy'])->name('shifts.destroy');
 
+        // Leave Types
         Route::get('/leave-types', [LeaveTypeController::class, 'index'])->name('leave-types.index');
         Route::get('/leave-types/create', [LeaveTypeController::class, 'create'])->name('leave-types.create');
         Route::post('/leave-types', [LeaveTypeController::class, 'store'])->name('leave-types.store');
@@ -57,23 +55,51 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class, 'destroy'])->name('leave-types.destroy');
     });
 
-    Route::get('/lieu-leaves', [LieuOffController::class, 'index'])->name('lieu-leaves.index');
-    Route::get('/lieu-leaves/create', [LieuOffController::class, 'create'])->name('lieu-leaves.create');
-    Route::post('/lieu-leaves', [LieuOffController::class, 'store'])->name('lieu-leaves.store');
-    Route::get('/lieu-leaves/{lieuOff}/edit', [LieuOffController::class, 'edit'])->name('lieu-leaves.edit');
-    Route::delete('/lieu-leaves/{lieuOff}', [LieuOffController::class, 'destroy'])->name('lieu-leaves.destroy');
-    Route::get('/my-lieu-offs', [LieuOffController::class, 'mylieuOffs'])->name('my-lieu-offs.index');
 
-    // Regular user routes
-    Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
-    Route::get('/my-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave-requests.show');
-    Route::get('/employee-leave-requests', [LeaveRequestController::class, 'employeeLeaveRequests'])->name('leave-requests.employee.index');
-    Route::get('/employee-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'employeeLeaveRequestShow'])->name('leave-requests.employee.show');
-    Route::get('/leave-requests/create', [LeaveRequestController::class, 'create'])->name('leave-requests.create');
-    Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
-    Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');
-    Route::post('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
-    Route::post('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
+    // Super Admin, Admin, Manager
+    Route::middleware(['role:super_admin,admin,manager'])->group(function () {
+        // Users
+        Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+
+        // Leave Requests
+        Route::get('/employee-leave-requests', [LeaveRequestController::class, 'employeeLeaveRequests'])->name('leave-requests.employee.index');
+        Route::get('/employee-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'employeeLeaveRequestShow'])->name('leave-requests.employee.show');
+
+        // Lieu Leaves
+        Route::get('/lieu-leaves', [LieuOffController::class, 'index'])->name('lieu-leaves.index');
+        Route::get('/lieu-leaves/create', [LieuOffController::class, 'create'])->name('lieu-leaves.create');
+        Route::post('/lieu-leaves', [LieuOffController::class, 'store'])->name('lieu-leaves.store');
+        Route::get('/lieu-leaves/{lieuOff}/edit', [LieuOffController::class, 'edit'])->name('lieu-leaves.edit');
+        Route::delete('/lieu-leaves/{lieuOff}', [LieuOffController::class, 'destroy'])->name('lieu-leaves.destroy');
+
+        // Approve/Reject Leave Request
+        Route::post('/leave-requests/{leaveRequest}/approve', [LeaveRequestController::class, 'approve'])->name('leave-requests.approve');
+        Route::post('/leave-requests/{leaveRequest}/reject', [LeaveRequestController::class, 'reject'])->name('leave-requests.reject');
+    });
+
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
+    });
+
+    Route::middleware(['role:manager'])->group(function () {
+        Route::get('/dashboard/manager', [DashboardController::class, 'managerDashboard'])->name('manager.dashboard');
+    });
+
+    Route::middleware(['role:employee'])->group(function () {
+        Route::get('/dashboard/employee', [DashboardController::class, 'employeeDashboard'])->name('employee.dashboard');
+    });
+
+
+    // Manager & Employee
+    Route::middleware(['role:manager,employee'])->group(function () {
+        Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
+        Route::get('/my-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave-requests.show');
+        Route::get('/my-lieu-offs', [LieuOffController::class, 'mylieuOffs'])->name('my-lieu-offs.index');
+        Route::get('/leave-requests/create', [LeaveRequestController::class, 'create'])->name('leave-requests.create');
+        Route::post('/leave-requests', [LeaveRequestController::class, 'store'])->name('leave-requests.store');
+        Route::delete('/leave-requests/{leaveRequest}', [LeaveRequestController::class, 'destroy'])->name('leave-requests.destroy');
+    });
 });
 
 require __DIR__ . '/settings.php';
