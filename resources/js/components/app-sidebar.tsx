@@ -9,7 +9,7 @@ import AppLogo from './app-logo';
 
 const adminNavItems: NavItem[] = [
     {
-        title: 'Users',
+        title: 'Employees',
         href: '/users',
         icon: Users2Icon,
     },

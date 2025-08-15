@@ -14,8 +14,8 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Home', href: '/' },
-    { title: 'Users', href: '/users' },
-    { title: 'Edit User', href: '#' },
+    { title: 'Employees', href: '/users' },
+    { title: 'Edit Employee', href: '#' },
 ];
 
 export default function EditUser({ user, shifts, designations }: Props) {
@@ -38,10 +38,10 @@ export default function EditUser({ user, shifts, designations }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Edit User" />
+            <Head title="Edit Employee" />
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Edit User</h1>
+                    <h1 className="text-2xl font-bold">Edit Employee</h1>
                 </div>
                 <div className="pt-4">
                     <form onSubmit={handleSubmit}>
@@ -148,7 +148,7 @@ export default function EditUser({ user, shifts, designations }: Props) {
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Saving...' : 'Update User'}
+                                    {processing ? 'Saving...' : 'Update Employee'}
                                 </Button>
                             </div>
                         </div>

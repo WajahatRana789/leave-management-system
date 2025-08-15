@@ -13,8 +13,8 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Home', href: '/' },
-    { title: 'Users', href: '/users' },
-    { title: 'Create User', href: 'javascript:void(0)' },
+    { title: 'Employees', href: '/users' },
+    { title: 'Create Employee', href: 'javascript:void(0)' },
 ];
 
 export default function CreateUser({ shifts, designations }: Props) {
@@ -37,10 +37,10 @@ export default function CreateUser({ shifts, designations }: Props) {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Create User" />
+            <Head title="Create Employee" />
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Create New User</h1>
+                    <h1 className="text-2xl font-bold">Create New Employee</h1>
                 </div>
                 <div className="pt-4">
                     <form onSubmit={handleSubmit}>
@@ -147,7 +147,7 @@ export default function CreateUser({ shifts, designations }: Props) {
                                     Cancel
                                 </Button>
                                 <Button type="submit" disabled={processing}>
-                                    {processing ? 'Creating...' : 'Create User'}
+                                    {processing ? 'Creating...' : 'Create Employee'}
                                 </Button>
                             </div>
                         </div>

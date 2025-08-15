@@ -7,7 +7,7 @@ import { Pencil, Trash2 } from 'lucide-react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Users',
+        title: 'Employees',
         href: '/users',
     },
 ];
@@ -64,7 +64,7 @@ const columns: ColumnDef<User>[] = [
                     return;
                 }
 
-                if (confirm(`Are you sure you want to delete user "${user.name}"?`)) {
+                if (confirm(`Are you sure you want to delete employee "${user.name}"?`)) {
                     router.delete(route('users.destroy', user.id));
                 }
             };
@@ -101,9 +101,9 @@ export default function UsersPage({ users }: UsersProps) {
             <Head title="Users" />
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">Users</h1>
+                    <h1 className="text-2xl font-bold">Employees</h1>
                     <Button asChild>
-                        <Link href={route('users.create')}>Create User</Link>
+                        <Link href={route('users.create')}>Create Employee</Link>
                     </Button>
                 </div>
 
