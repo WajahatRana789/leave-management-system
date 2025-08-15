@@ -15,7 +15,13 @@ class UserController extends Controller
 
         // Role-based filtering
         if (auth()->user()->role === 'manager') {
-            $query->whereHas('shift', fn($q) => $q->where('manager_id', auth()->id()));
+            $query->whereHas(
+                'shift',
+                fn($q) =>
+                $q->where('manager_id', auth()->id())
+            )
+                ->where('id', '!=', auth()->id()) // hide current manager
+                ->where('role', '!=', 'manager'); // hide other managers
         } elseif (auth()->user()->role === 'admin') {
             $query->whereNotIn('role', ['admin', 'super_admin']);
         }
