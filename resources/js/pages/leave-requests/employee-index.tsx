@@ -58,7 +58,7 @@ export default function EmployeeLeaveRequests({ requests, authUser, canReview }:
             <Head title="Employee Leave Requests" />
             <div className="p-4">
                 <div className="mb-4 flex items-center justify-between">
-                    <h1 className="text-2xl font-bold">{authUser.role === 'manager' ? 'Team Leave Requests' : 'Employee Leave Requests'}</h1>
+                    <h1 className="text-2xl font-bold">Employee Leave Requests</h1>
 
                     <div className="flex gap-2">
                         <Button
