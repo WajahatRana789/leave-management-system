@@ -83,7 +83,7 @@ export default function EmployeeDashboard() {
                     )}
 
                     <section className="space-y-2">
-                        <h2 className="text-lg font-semibold">Leave Balance</h2>
+                        <h2 className="text-lg font-semibold">My Leave Balance</h2>
                         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                             {/* Regular Leave Balances */}
                             {leaveBalances.map((leave) => {
@@ -133,7 +133,7 @@ export default function EmployeeDashboard() {
 
                     {/* Rest of your sections... */}
                     <section>
-                        <h2 className="mb-2 text-lg font-semibold">Pending Requests</h2>
+                        <h2 className="mb-2 text-lg font-semibold">My Pending Requests</h2>
                         <div className="flex flex-col gap-4 md:flex-row">
                             <div className="flex flex-1 items-center gap-3 rounded-xl border bg-white p-4 shadow">
                                 <Clock className="h-6 w-6 text-yellow-500" />
@@ -155,7 +155,7 @@ export default function EmployeeDashboard() {
                     </section>
 
                     <section>
-                        <h2 className="mb-2 text-lg font-semibold">Recent Leave History</h2>
+                        <h2 className="mb-2 text-lg font-semibold">My Recent Leave History</h2>
                         <div className="overflow-x-auto rounded-xl border bg-white shadow">
                             <table className="min-w-full text-left text-sm">
                                 <thead className="bg-gray-100 text-gray-700">
@@ -195,7 +195,7 @@ export default function EmployeeDashboard() {
                     </section>
 
                     <section>
-                        <h2 className="mb-2 text-lg font-semibold">Team on Leave Today</h2>
+                        <h2 className="mb-2 text-lg font-semibold">My Shift Members on Leave Today</h2>
                         <div className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow">
                             <Users className="h-6 w-6 text-indigo-500" />
                             <p>
