@@ -16,9 +16,11 @@ class UserController extends Controller
         if (auth()->user()->role === 'manager') {
             $query->whereHas('shift', fn($q) => $q->where('manager_id', auth()->id()));
         } elseif (auth()->user()->role === 'admin') {
-            $query->where('role', '!=', 'admin'); // Hide other admins
+            $query->whereNotIn('role', ['admin', 'super_admin']);
         }
-        // Super-admin sees all (no filter)
+
+        $query->whereNotIn('role', ['super_admin']);
+
 
         // Server-side search
         if ($request->has('search')) {
