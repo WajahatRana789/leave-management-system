@@ -200,14 +200,18 @@ export default function EmployeeDashboard() {
                         <h2 className="mb-2 text-lg font-semibold">My Shift Members on Leave Today</h2>
                         <div className="flex items-center gap-3 rounded-xl border bg-white p-4 shadow">
                             <Users className="h-6 w-6 text-indigo-500" />
-                            <p>
-                                <span className="font-semibold">{teamOnLeaveToday.length}</span> teammates on leave today:{' '}
-                                {teamOnLeaveToday.map((t, i) => (
-                                    <span key={i} className="ml-1 text-sm font-medium text-gray-700">
-                                        {t.user.name} ({t.leave_type.name}){i < teamOnLeaveToday.length - 1 ? ',' : ''}
-                                    </span>
-                                ))}
-                            </p>
+                            {teamOnLeaveToday.length > 0 ? (
+                                <p>
+                                    <span className="font-semibold">{teamOnLeaveToday.length}</span> teammates on leave today:{' '}
+                                    {teamOnLeaveToday.map((t, i) => (
+                                        <span key={i} className="ml-1 text-sm font-medium text-gray-700">
+                                            {t.user.name} ({t.leave_type.name}){i < teamOnLeaveToday.length - 1 ? ',' : ''}
+                                        </span>
+                                    ))}
+                                </p>
+                            ) : (
+                                <p className="text-sm text-gray-600">No one is on leave today 🎉</p>
+                            )}
                         </div>
                     </section>
 
