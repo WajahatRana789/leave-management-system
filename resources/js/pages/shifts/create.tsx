@@ -45,7 +45,7 @@ export default function CreateShift({ managers }: Props) {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="manager_id">Manager*</Label>
+                                    <Label htmlFor="manager_id">Shift Incharge*</Label>
                                     <Select value={data.manager_id} onValueChange={(val) => setData('manager_id', val)}>
                                         <SelectTrigger id="manager_id" className="w-full">
                                             <SelectValue placeholder="-- Choose manager --" />

@@ -39,7 +39,7 @@ const columns: ColumnDef<Shift>[] = [
     { accessorKey: 'name', header: 'Shift Name' },
     {
         accessorKey: 'manager.name',
-        header: 'Manager',
+        header: 'Shift Incharge',
         cell: ({ row }) => row.original.manager?.name || '-',
     },
     {

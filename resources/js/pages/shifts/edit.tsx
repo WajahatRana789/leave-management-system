@@ -45,7 +45,7 @@ export default function EditShift({ shift, managers }: Props) {
                             </div>
 
                             <div>
-                                <Label htmlFor="manager_id">Manager</Label>
+                                <Label htmlFor="manager_id">Shift Incharge</Label>
                                 <Select
                                     value={data.manager_id ? String(data.manager_id) : undefined}
                                     onValueChange={(val) => setData('manager_id', val)}
