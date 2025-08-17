@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, Clock, FileText, Gift, User, X } from 'lucide-react';
 
@@ -84,7 +85,7 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                         <div className="flex items-start justify-between">
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-900">{request.leave_type.name}</h2>
-                                <p className="mt-1 text-sm text-gray-500">Submitted on {new Date(request.created_at).toLocaleDateString()}</p>
+                                <p className="mt-1 text-sm text-gray-500">Submitted on {formatDisplay(request.created_at)}</p>
                             </div>
                             <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusColors[request.status]}`}>
                                 {request.status.toUpperCase()}
@@ -123,11 +124,11 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                 <dl className="mt-2 space-y-3">
                                     <div className="flex justify-between">
                                         <dt className="text-sm font-medium text-gray-500">From</dt>
-                                        <dd className="text-sm text-gray-900">{new Date(request.from_date).toLocaleDateString()}</dd>
+                                        <dd className="text-sm text-gray-900">{formatDisplay(request.from_date)}</dd>
                                     </div>
                                     <div className="flex justify-between">
                                         <dt className="text-sm font-medium text-gray-500">To</dt>
-                                        <dd className="text-sm text-gray-900">{new Date(request.to_date).toLocaleDateString()}</dd>
+                                        <dd className="text-sm text-gray-900">{formatDisplay(request.to_date)}</dd>
                                     </div>
                                 </dl>
                             </div>
@@ -142,11 +143,11 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                     <dl className="mt-2 space-y-3">
                                         <div className="flex justify-between">
                                             <dt className="text-sm font-medium text-gray-500">Work Date</dt>
-                                            <dd className="text-sm text-gray-900">{new Date(request.lieu_off.work_date).toLocaleDateString()}</dd>
+                                            <dd className="text-sm text-gray-900">{formatDisplay(request.lieu_off.work_date)}</dd>
                                         </div>
                                         <div className="flex justify-between">
                                             <dt className="text-sm font-medium text-gray-500">Expiry Date</dt>
-                                            <dd className="text-sm text-gray-900">{new Date(request.lieu_off.expiry_date).toLocaleDateString()}</dd>
+                                            <dd className="text-sm text-gray-900">{formatDisplay(request.lieu_off.expiry_date)}</dd>
                                         </div>
                                         {request.lieu_off.granted_by_user && (
                                             <div className="flex justify-between">
@@ -192,7 +193,7 @@ export default function MyRequestShow({ request, canDelete }: Props) {
                                         <div className="flex justify-between">
                                             <dt className="text-sm font-medium text-gray-500">Reviewed On</dt>
                                             <dd className="text-sm text-gray-900">
-                                                {request.reviewed_at ? new Date(request.reviewed_at).toLocaleDateString() : 'N/A'}
+                                                {request.reviewed_at ? formatDisplay(request.reviewed_at) : 'N/A'}
                                             </dd>
                                         </div>
                                         {request.remarks && (

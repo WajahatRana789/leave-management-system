@@ -1,5 +1,6 @@
 import EmployeeLeaveCalendar from '@/components/EmployeeLeaveCalendar';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { LeaveBalance, LeaveRequest, ShiftInfo, TeamMemberOnLeave, type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
 import { Briefcase, CalendarDays, Clock, FileText, Mail, MessageSquare, Phone, PlusCircle, User, Users } from 'lucide-react';
@@ -186,9 +187,7 @@ export default function EmployeeDashboard() {
                                                     {entry.status}
                                                 </span>
                                             </td>
-                                            <td className="p-3 text-gray-600">
-                                                {entry.reviewed_at ? new Date(entry.reviewed_at).toLocaleDateString() : '-'}
-                                            </td>
+                                            <td className="p-3 text-gray-600">{entry.reviewed_at ? formatDisplay(entry.reviewed_at) : '-'}</td>
                                         </tr>
                                     ))}
                                 </tbody>

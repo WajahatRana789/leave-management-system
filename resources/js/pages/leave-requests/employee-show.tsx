@@ -1,10 +1,10 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { Dialog } from '@headlessui/react';
 import { Head, Link, router } from '@inertiajs/react';
 import { ArrowLeft, CalendarDays, Check, Clock, FileText, User, X } from 'lucide-react';
 import { useState } from 'react';
-
 interface User {
     id: number;
     name: string;
@@ -132,7 +132,7 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                 <h2 className="text-2xl font-bold text-gray-900">
                                     {request.user.name}'s {request.leave_type.name}
                                 </h2>
-                                <p className="mt-1 text-sm text-gray-500">Submitted on {new Date(request.created_at).toLocaleDateString()}</p>
+                                <p className="mt-1 text-sm text-gray-500">Submitted on {formatDisplay(request.created_at)}</p>
                             </div>
                             <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${statusColors[request.status]}`}>
                                 {request.status.toUpperCase()}
@@ -171,11 +171,11 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                 <dl className="mt-2 space-y-3">
                                     <div className="flex justify-between">
                                         <dt className="text-sm font-medium text-gray-500">From</dt>
-                                        <dd className="text-sm text-gray-900">{new Date(request.from_date).toLocaleDateString()}</dd>
+                                        <dd className="text-sm text-gray-900">{formatDisplay(request.from_date)}</dd>
                                     </div>
                                     <div className="flex justify-between">
                                         <dt className="text-sm font-medium text-gray-500">To</dt>
-                                        <dd className="text-sm text-gray-900">{new Date(request.to_date).toLocaleDateString()}</dd>
+                                        <dd className="text-sm text-gray-900">{formatDisplay(request.to_date)}</dd>
                                     </div>
                                     <div className="flex justify-between">
                                         <dt className="text-sm font-medium text-gray-500">Total Days</dt>
@@ -208,7 +208,7 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                         <div className="flex justify-between">
                                             <dt className="text-sm font-medium text-gray-500">Reviewed On</dt>
                                             <dd className="text-sm text-gray-900">
-                                                {request.reviewed_at ? new Date(request.reviewed_at).toLocaleDateString() : 'N/A'}
+                                                {request.reviewed_at ? formatDisplay(request.reviewed_at) : 'N/A'}
                                             </dd>
                                         </div>
                                         {request.remarks && (
