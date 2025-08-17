@@ -51,7 +51,9 @@ class LeaveRequestController extends Controller
         // Managers can only see their team's requests
         if ($user->role === 'manager') {
             $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
-            $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
+            $teamUserIds = User::whereIn('shift_id', $shiftIds)
+                ->where('id', '!=', $user->id)
+                ->pluck('id');
 
             $query->whereIn('user_id', $teamUserIds);
         }
