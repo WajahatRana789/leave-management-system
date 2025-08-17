@@ -77,9 +77,11 @@ export default function ShiftInchargeDashboard() {
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 <div className="space-y-6">
-                    <div className="mb-0 text-sm text-gray-600">{today}</div>
                     <div className="flex items-center justify-between">
-                        <h1 className="text-2xl font-bold">Dashboard</h1>
+                        <div>
+                            <h1 className="text-2xl font-bold">Dashboard</h1>
+                            <div className="mb-0 text-sm text-gray-600">{today}</div>
+                        </div>
                         <div className="flex flex-wrap gap-4">
                             <button
                                 onClick={() => setShowCalendar(!showCalendar)}
