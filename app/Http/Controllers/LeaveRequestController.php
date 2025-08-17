@@ -462,6 +462,14 @@ class LeaveRequestController extends Controller
             'remarks' => $request->input('remarks')
         ]);
 
+        // If this leave request was for a lieu off, reset its status
+        if ($leaveRequest->lieu_off_id) {
+            $lieuOff = LieuOff::find($leaveRequest->lieu_off_id);
+            if ($lieuOff && $lieuOff->status === 'pending_approval') {
+                $lieuOff->update(['status' => 'available']);
+            }
+        }
+
         // Send rejection notification (optional)
         // Mail::to($leaveRequest->user->email)->send(new LeaveRequestRejected($leaveRequest));
 
