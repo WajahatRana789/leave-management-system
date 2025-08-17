@@ -224,6 +224,13 @@ class LeaveRequestController extends Controller
                 ])->withInput();
             }
 
+            // Quick check for expiry date before proceeding
+            if ($fromDate->greaterThan($lieuOff->expiry_date)) {
+                return back()->withErrors([
+                    'from_date' => 'Leave date cannot be after the lieu off expiry date.'
+                ])->withInput();
+            }
+
             return $this->storeLieuLeaveRequest($user, $validated, $fromDate, $toDate, $totalDays);
         }
 
@@ -295,6 +302,13 @@ class LeaveRequestController extends Controller
         if ($fromDate->lessThanOrEqualTo($lieuOff->work_date)) {
             throw ValidationException::withMessages([
                 'from_date' => 'Leave date must be after the work date.',
+            ]);
+        }
+
+        //  Check that leave date is not after expiry date
+        if ($fromDate->greaterThan($lieuOff->expiry_date)) {
+            throw ValidationException::withMessages([
+                'from_date' => 'Leave date cannot be after the lieu off expiry date.',
             ]);
         }
 
