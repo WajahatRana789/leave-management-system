@@ -40,7 +40,7 @@ export default function ManagerDashboard() {
     const oldestPending = pendingRequests.length ? Math.min(...pendingRequests.map((r) => new Date(r.created_at).getTime())) : null;
 
     const formatDateRange = (from: string, to: string) => {
-        return from === to ? from : `${formatDisplay(from)} - ${formatDisplay(to)}`;
+        return from === to ? formatDisplay(from) : `${formatDisplay(from)} - ${formatDisplay(to)}`;
     };
 
     const handleApprove = (id: number) => {

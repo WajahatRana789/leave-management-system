@@ -42,7 +42,7 @@ export default function EmployeeDashboard() {
     const oldestPending = pendingRequests.length ? Math.min(...pendingRequests.map((r) => new Date(r.from_date).getTime())) : null;
 
     const formatDateRange = (from: string, to: string) => {
-        return from === to ? from : `${formatDisplay(from)} - ${formatDisplay(to)}`;
+        return from === to ? formatDisplay(from) : `${formatDisplay(from)} - ${formatDisplay(to)}`;
     };
 
     return (
