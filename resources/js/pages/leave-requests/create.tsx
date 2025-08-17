@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
@@ -142,26 +142,14 @@ export default function CreateLeaveRequest({ leaveTypes, availableLieuOffs, avai
                                 {/* From Date */}
                                 <div>
                                     <Label htmlFor="from_date">From Date*</Label>
-                                    <Input
-                                        id="from_date"
-                                        type="date"
-                                        value={data.from_date}
-                                        onChange={(e) => setData('from_date', e.target.value)}
-                                        required
-                                    />
+                                    <DatePicker value={data.from_date} onChange={(val) => setData('from_date', val)} required />
                                     {errors.from_date && <p className="text-sm text-red-500">{errors.from_date}</p>}
                                 </div>
 
                                 {/* To Date */}
                                 <div>
                                     <Label htmlFor="to_date">To Date*</Label>
-                                    <Input
-                                        id="to_date"
-                                        type="date"
-                                        value={data.to_date}
-                                        onChange={(e) => setData('to_date', e.target.value)}
-                                        required
-                                    />
+                                    <DatePicker value={data.to_date} onChange={(val) => setData('to_date', val)} required />
                                     {errors.to_date && <p className="text-sm text-red-500">{errors.to_date}</p>}
                                 </div>
                             </div>

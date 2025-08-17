@@ -183,6 +183,7 @@ class LeaveRequestController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+        $currentYear = Carbon::now()->year;
 
         // Step 1: Validate input
         $validated = Validator::make($request->all(), [
@@ -248,6 +249,7 @@ class LeaveRequestController extends Controller
         $usedLeaveDays = LeaveRequest::where('user_id', $user->id)
             ->where('leave_type_id', $leaveType->id)
             ->whereIn('status', ['approved', 'pending'])
+            ->whereYear('from_date', $currentYear)
             ->sum('total_days');
 
         $remainingDays = $leaveType->default_days - $usedLeaveDays;
