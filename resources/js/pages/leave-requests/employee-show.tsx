@@ -214,7 +214,7 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                         {request.remarks && (
                                             <div className="flex flex-col">
                                                 <dt className="text-sm font-medium text-gray-500">Remarks</dt>
-                                                <dd className="mt-1 rounded bg-gray-50 p-2 text-sm text-gray-700">{request.remarks}</dd>
+                                                <dd className="mt-1 rounded text-sm text-gray-700">{request.remarks}</dd>
                                             </div>
                                         )}
                                     </dl>
