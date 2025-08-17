@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 
@@ -130,7 +131,7 @@ export default function CreateLeaveRequest({ leaveTypes, availableLieuOffs, avai
                                             <SelectContent>
                                                 {availableLieuOffs.map((lieu) => (
                                                     <SelectItem key={lieu.id} value={String(lieu.id)}>
-                                                        {lieu.work_date} (expires {lieu.expiry_date})
+                                                        {formatDisplay(lieu.work_date)} (expires {formatDisplay(lieu.expiry_date)})
                                                     </SelectItem>
                                                 ))}
                                             </SelectContent>
