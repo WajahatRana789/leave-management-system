@@ -116,44 +116,71 @@ export default function CreateLeaveRequest({ leaveTypes, availableLieuOffs, avai
                                 {/* Lieu Off Date Selection */}
                                 {selectedLeaveType?.key === 'lieu_leave' && availableLieuOffs.length > 0 && (
                                     <div>
-                                        <Label htmlFor="lieu_off_id">Select Lieu Date*</Label>
-                                        <Select
-                                            value={data.lieu_off_id}
-                                            onValueChange={(value) => {
-                                                setData('lieu_off_id', value);
-                                                setData('is_lieu_off', true);
-                                            }}
-                                        >
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Select available lieu date" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {availableLieuOffs.map((lieu) => (
-                                                    <SelectItem key={lieu.id} value={String(lieu.id)}>
-                                                        {formatDisplay(lieu.work_date)} (expires {formatDisplay(lieu.expiry_date)})
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        {errors.lieu_off_id && <p className="text-sm text-red-500">{errors.lieu_off_id}</p>}
+                                        <div className="mb-3">
+                                            <Label htmlFor="lieu_off_id">Select Lieu Date*</Label>
+                                            <Select
+                                                value={data.lieu_off_id}
+                                                onValueChange={(value) => {
+                                                    setData('lieu_off_id', value);
+                                                    setData('is_lieu_off', true);
+                                                }}
+                                            >
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select available lieu date" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {availableLieuOffs.map((lieu) => (
+                                                        <SelectItem key={lieu.id} value={String(lieu.id)}>
+                                                            {formatDisplay(lieu.work_date)} (expires {formatDisplay(lieu.expiry_date)})
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                            {errors.lieu_off_id && <p className="text-sm text-red-500">{errors.lieu_off_id}</p>}
+                                        </div>
+
+                                        {/* Lieu Leave Date */}
+                                        <div>
+                                            <Label htmlFor="lieu_leave_date">Leave Date*</Label>
+                                            <DatePicker
+                                                value={data.from_date}
+                                                onChange={(val) => {
+                                                    setData('from_date', val);
+                                                    setData('to_date', val);
+                                                }}
+                                                required
+                                            />
+                                            {errors.from_date && <p className="text-sm text-red-500">{errors.from_date}</p>}
+                                        </div>
                                     </div>
                                 )}
                             </div>
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                {/* From Date */}
-                                <div>
-                                    <Label htmlFor="from_date">From Date*</Label>
-                                    <DatePicker value={data.from_date} onChange={(val) => setData('from_date', val)} required />
-                                    {errors.from_date && <p className="text-sm text-red-500">{errors.from_date}</p>}
-                                </div>
 
-                                {/* To Date */}
-                                <div>
-                                    <Label htmlFor="to_date">To Date*</Label>
-                                    <DatePicker value={data.to_date} onChange={(val) => setData('to_date', val)} required />
-                                    {errors.to_date && <p className="text-sm text-red-500">{errors.to_date}</p>}
-                                </div>
-                            </div>
+                            {selectedLeaveType?.key !== 'lieu_leave' && (
+                                <>
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                        {/* From Date */}
+                                        <div>
+                                            <Label htmlFor="from_date">From Date*</Label>
+                                            <DatePicker
+                                                value={data.from_date}
+                                                onChange={(val) => {
+                                                    setData('from_date', val);
+                                                }}
+                                                required
+                                            />
+                                            {errors.from_date && <p className="text-sm text-red-500">{errors.from_date}</p>}
+                                        </div>
+
+                                        {/* To Date */}
+                                        <div>
+                                            <Label htmlFor="to_date">To Date*</Label>
+                                            <DatePicker value={data.to_date} onChange={(val) => setData('to_date', val)} required />
+                                            {errors.to_date && <p className="text-sm text-red-500">{errors.to_date}</p>}
+                                        </div>
+                                    </div>
+                                </>
+                            )}
 
                             {/* Reason */}
                             <div>
