@@ -111,7 +111,7 @@ export default function ShiftInchargeDashboard() {
                                                 className="inline-flex items-center gap-2 rounded-xl bg-green-600 px-3 py-2 text-white shadow hover:bg-green-700"
                                             >
                                                 <PlusCircle className="h-4 w-4" />
-                                                Request Leave
+                                                Apply for Leave
                                             </Link>
                                             <Link
                                                 href="/my-leave-requests"

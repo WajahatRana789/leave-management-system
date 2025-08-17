@@ -55,8 +55,12 @@ export default function MyLeaveRequests({ requests, authUser }: Props) {
         <AppLayout>
             <Head title="My Leave Requests" />
             <div className="p-4">
-                <h1 className="mb-4 text-2xl font-bold">My Leave Requests</h1>
-
+                <div className="align-items-center mb-3 flex justify-between">
+                    <h1 className="mb-4 text-2xl font-bold">My Leave Requests</h1>
+                    <Button>
+                        <Link href="/leave-requests/create">Apply for Leave</Link>
+                    </Button>
+                </div>
                 <div className="overflow-x-auto rounded-lg border">
                     <table className="min-w-full divide-y divide-gray-200 text-sm">
                         <thead className="bg-gray-100 text-left">

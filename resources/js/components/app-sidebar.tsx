@@ -57,7 +57,7 @@ const navItems: (NavItem & { roles: string[] })[] = [
         roles: ['shift_incharge', 'employee'],
     },
     {
-        title: 'Request For Leave',
+        title: 'Apply for Leave',
         href: '/leave-requests/create',
         icon: Send,
         roles: ['shift_incharge', 'employee'],
