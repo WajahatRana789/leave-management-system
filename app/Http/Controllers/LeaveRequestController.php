@@ -344,7 +344,9 @@ class LeaveRequestController extends Controller
         }
 
         // Prevent duplicate Lieu Off usage
-        $alreadyUsed = LeaveRequest::where('lieu_off_id', $lieuOffId)->exists();
+        $alreadyUsed = LeaveRequest::where('lieu_off_id', $lieuOffId)
+            ->where('status', '!=', 'rejected')
+            ->exists();
         if ($alreadyUsed) {
             throw ValidationException::withMessages([
                 'from_date' => 'This lieu leave has already been used for a leave request.',
