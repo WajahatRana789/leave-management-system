@@ -20,7 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         $user = Auth::user();
         return match ($user->role) {
             'employee' => redirect()->route('employee.dashboard'),
-            'manager' => redirect()->route('manager.dashboard'),
+            'shift_incharge' => redirect()->route('shift_incharge.dashboard'),
             'admin' => redirect()->route('admin.dashboard'),
             'super_admin' => redirect()->route('superadmin.dashboard'),
             default => abort(403, 'Unauthorized'),
@@ -56,8 +56,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
 
-    // Super Admin, Admin, Manager
-    Route::middleware(['role:super_admin,admin,manager'])->group(function () {
+    // Super Admin, Admin, Shift Incharge
+    Route::middleware(['role:super_admin,admin,shift_incharge'])->group(function () {
         // Users
         Route::get('/users', [UserController::class, 'index'])->name('users.index');
 
@@ -82,8 +82,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/dashboard/admin', [DashboardController::class, 'adminDashboard'])->name('admin.dashboard');
     });
 
-    Route::middleware(['role:manager'])->group(function () {
-        Route::get('/dashboard/manager', [DashboardController::class, 'managerDashboard'])->name('manager.dashboard');
+    Route::middleware(['role:shift_incharge'])->group(function () {
+        Route::get('/dashboard/shift-incharge', [DashboardController::class, 'shift_inchargeDashboard'])->name('shift_incharge.dashboard');
     });
 
     Route::middleware(['role:employee'])->group(function () {
@@ -91,8 +91,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
 
-    // Manager & Employee
-    Route::middleware(['role:manager,employee'])->group(function () {
+    // Shift Incharge & Employee
+    Route::middleware(['role:shift_incharge,employee'])->group(function () {
         Route::get('/my-leave-requests', [LeaveRequestController::class, 'index'])->name('leave-requests.index');
         Route::get('/my-leave-requests/{leaveRequest}', [LeaveRequestController::class, 'show'])->name('leave-requests.show');
         Route::get('/my-lieu-offs', [LieuOffController::class, 'mylieuOffs'])->name('my-lieu-offs.index');

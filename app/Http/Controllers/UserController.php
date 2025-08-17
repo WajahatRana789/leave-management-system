@@ -14,14 +14,14 @@ class UserController extends Controller
         $query = User::query()->with(['shift', 'designation']);
 
         // Role-based filtering
-        if (auth()->user()->role === 'manager') {
+        if (auth()->user()->role === 'shift_incharge') {
             $query->whereHas(
                 'shift',
                 fn($q) =>
-                $q->where('manager_id', auth()->id())
+                $q->where('shift_incharge_id', auth()->id())
             )
-                ->where('id', '!=', auth()->id()) // hide current manager
-                ->where('role', '!=', 'manager'); // hide other managers
+                ->where('id', '!=', auth()->id()) // hide current shift_incharge
+                ->where('role', '!=', 'shift_incharge'); // hide other shift_incharges
         } elseif (auth()->user()->role === 'admin') {
             $query->whereNotIn('role', ['admin', 'super_admin']);
         }
@@ -70,7 +70,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
-            'role' => 'required|in:employee,manager,admin',
+            'role' => 'required|in:employee,shift_incharge,admin',
             'shift_id' => 'nullable|exists:shifts,id',
             'designation_id' => 'nullable|exists:designations,id',
             'phone' => 'nullable|string',
@@ -113,7 +113,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'password' => 'nullable|string|min:6',
-            'role' => 'required|in:employee,manager,admin',
+            'role' => 'required|in:employee,shift_incharge,admin',
             'shift_id' => 'nullable|exists:shifts,id',
             'designation_id' => 'nullable|exists:designations,id',
             'phone' => 'nullable|string',

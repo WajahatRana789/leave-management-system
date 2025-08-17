@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('shifts', function (Blueprint $table) {
             $table->id();
             $table->string('name'); // Morning, Evening, etc.
-            $table->unsignedBigInteger('manager_id')->nullable();
-            $table->foreign('manager_id')->references('id')->on('users')->nullOnDelete();
+            $table->unsignedBigInteger('shift_incharge_id')->nullable();
+            $table->foreign('shift_incharge_id')->references('id')->on('users')->nullOnDelete();
             $table->timestamps();
         });
     }

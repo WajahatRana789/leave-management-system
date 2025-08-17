@@ -23,11 +23,11 @@ class LieuOffController extends Controller
             'grantedByUser'
         ]);
 
-        if ($user->role === 'manager') {
-            // Get lieu leaves for all team members under this manager
+        if ($user->role === 'shift_incharge') {
+            // Get lieu leaves for all team members under this shift_incharge
             $query->whereHas('user', function ($q) use ($user) {
                 $q->whereHas('shift', function ($q) use ($user) {
-                    $q->where('manager_id', $user->id);
+                    $q->where('shift_incharge_id', $user->id);
                 });
             });
         }
@@ -44,14 +44,14 @@ class LieuOffController extends Controller
         $query = User::query()->with('shift');
 
         // Role-based filtering
-        if (auth()->user()->role === 'manager') {
+        if (auth()->user()->role === 'shift_incharge') {
             $query->whereHas(
                 'shift',
                 fn($q) =>
-                $q->where('manager_id', auth()->id())
+                $q->where('shift_incharge_id', auth()->id())
             )
-                ->where('id', '!=', auth()->id()) // hide current manager
-                ->where('role', '!=', 'manager'); // hide other managers
+                ->where('id', '!=', auth()->id()) // hide current shift_incharge
+                ->where('role', '!=', 'shift_incharge'); // hide other shift_incharges
         } elseif (auth()->user()->role === 'admin') {
             $query->where('role', '!=', 'admin'); // Hide other admins
         }
@@ -77,7 +77,7 @@ class LieuOffController extends Controller
         $authUser = auth()->user();
 
         // 1. Authorize
-        if (!in_array($authUser->role, ['manager', 'admin', 'super_admin'])) {
+        if (!in_array($authUser->role, ['shift_incharge', 'admin', 'super_admin'])) {
             abort(403, 'You are not authorized to grant lieu leave.');
         }
 
@@ -94,10 +94,10 @@ class LieuOffController extends Controller
             $validated['expiry_date'] = Carbon::parse($validated['work_date'])->addDays(60)->toDateString();
         }
 
-        // 4. Manager restriction
-        if ($authUser->role === 'manager') {
+        // 4. Shift Incharge Restriction
+        if ($authUser->role === 'shift_incharge') {
             $isTeamMember = User::where('id', $validated['user_id'])
-                ->whereHas('shift', fn($q) => $q->where('manager_id', $authUser->id))
+                ->whereHas('shift', fn($q) => $q->where('shift_incharge_id', $authUser->id))
                 ->exists();
 
             if (!$isTeamMember) {
@@ -135,7 +135,7 @@ class LieuOffController extends Controller
         $authUser = auth()->user();
 
         // 1. Authorize
-        if (!in_array($authUser->role, ['manager', 'admin', 'super_admin'])) {
+        if (!in_array($authUser->role, ['shift_incharge', 'admin', 'super_admin'])) {
             abort(403, 'You are not authorized to delete lieu leave.');
         }
 
@@ -143,11 +143,11 @@ class LieuOffController extends Controller
         $query = LieuOff::where('id', $lieuOff->id)
             ->where('status', 'available');
 
-        // 3. If user is manager, restrict to their team
-        if ($authUser->role === 'manager') {
+        // 3. If user is shift_incharge, restrict to their team
+        if ($authUser->role === 'shift_incharge') {
             $query->whereHas('user', function ($q) use ($authUser) {
                 $q->whereHas('shift', function ($q) use ($authUser) {
-                    $q->where('manager_id', $authUser->id);
+                    $q->where('shift_incharge_id', $authUser->id);
                 });
             });
         }

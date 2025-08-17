@@ -12,13 +12,13 @@ const navItems: (NavItem & { roles: string[] })[] = [
         title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
-        roles: ['super_admin', 'admin', 'manager', 'employee'],
+        roles: ['super_admin', 'admin', 'shift_incharge', 'employee'],
     },
     {
         title: 'Employees',
         href: '/users',
         icon: Users2Icon,
-        roles: ['super_admin', 'admin', 'manager'],
+        roles: ['super_admin', 'admin', 'shift_incharge'],
     },
     {
         title: 'Shifts',
@@ -36,31 +36,31 @@ const navItems: (NavItem & { roles: string[] })[] = [
         title: 'Lieu Leaves',
         href: '/lieu-leaves',
         icon: CalendarPlus,
-        roles: ['super_admin', 'admin', 'manager'],
+        roles: ['super_admin', 'admin', 'shift_incharge'],
     },
     {
         title: 'Employee Leave Requests',
         href: '/employee-leave-requests',
         icon: ListChecks,
-        roles: ['super_admin', 'admin', 'manager'],
+        roles: ['super_admin', 'admin', 'shift_incharge'],
     },
     {
         title: 'My Leave Requests',
         href: '/my-leave-requests',
         icon: List,
-        roles: ['manager', 'employee'],
+        roles: ['shift_incharge', 'employee'],
     },
     {
         title: 'My Lieu Offs',
         href: '/my-lieu-offs',
         icon: List,
-        roles: ['manager', 'employee'],
+        roles: ['shift_incharge', 'employee'],
     },
     {
         title: 'Request For Leave',
         href: '/leave-requests/create',
         icon: Send,
-        roles: ['manager', 'employee'],
+        roles: ['shift_incharge', 'employee'],
     },
 ];
 

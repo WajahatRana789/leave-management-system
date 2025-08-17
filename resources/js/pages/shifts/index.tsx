@@ -12,7 +12,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface Manager {
+interface ShiftIncharge {
     id: number;
     name: string;
     email: string;
@@ -21,7 +21,7 @@ interface Manager {
 interface Shift {
     id: number;
     name: string;
-    managers: Manager[];
+    shift_incharges: ShiftIncharge[];
 }
 
 interface ShiftsProps {
@@ -38,9 +38,9 @@ interface ShiftsProps {
 const columns: ColumnDef<Shift>[] = [
     { accessorKey: 'name', header: 'Shift Name' },
     {
-        accessorKey: 'manager.name',
+        accessorKey: 'shift_incharge.name',
         header: 'Shift Incharge',
-        cell: ({ row }) => row.original.manager?.name || '-',
+        cell: ({ row }) => row.original.shift_incharge?.name || '-',
     },
     {
         id: 'actions',

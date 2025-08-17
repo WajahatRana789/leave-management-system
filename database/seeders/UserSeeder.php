@@ -65,19 +65,19 @@ class UserSeeder extends Seeder
             'phone' => '03335169581',
         ]);
 
-        // 2) Managers with shift assignment
-        $managers = [
+        // 2) Shift Incharges with shift assignment
+        $shift_incharges = [
             ['Javed Arif', 'SI', 'xplorer2471@gmail.com', '03345257669', 'Morning'],
             ['Tariq Ali Anjum', 'SI', 'tariqalianjum123@gmail.com', '03005206233', 'Evening'],
         ];
 
-        foreach ($managers as [$name, $shortCode, $email, $phone, $shiftName]) {
+        foreach ($shift_incharges as [$name, $shortCode, $email, $phone, $shiftName]) {
             User::create([
                 'code' => $this->generateUniqueCode(),
                 'name' => $name,
                 'email' => $email,
                 'password' => Hash::make('password'),
-                'role' => 'manager',
+                'role' => 'shift_incharge',
                 'shift_id' => $shiftMap[$shiftName] ?? null,
                 'designation_id' => $designationMap[$shortCode],
                 'phone' => $phone,

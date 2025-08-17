@@ -11,7 +11,7 @@ class ShiftController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Shift::with('manager');
+        $query = Shift::with('shift_incharge');
 
         // Server-side search
         if ($request->has('search')) {
@@ -26,21 +26,21 @@ class ShiftController extends Controller
 
     public function create()
     {
-        // Get only users who are managers
-        $managers = User::where('role', 'manager')->get(['id', 'name', 'email']);
-        return inertia('shifts/create', ['managers' => $managers]);
+        // Get only users who are shift_incharges
+        $shift_incharges = User::where('role', 'shift_incharge')->get(['id', 'name', 'email']);
+        return inertia('shifts/create', ['shift_incharges' => $shift_incharges]);
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'manager_id' => ['required', 'exists:users,id'],
+            'shift_incharge_id' => ['required', 'exists:users,id'],
         ]);
 
         Shift::create([
             'name' => $request->name,
-            'manager_id' => $request->manager_id,
+            'shift_incharge_id' => $request->shift_incharge_id,
         ]);
 
         return redirect()->route('shifts.index')->with('success', 'Shift created successfully!');
@@ -48,11 +48,11 @@ class ShiftController extends Controller
 
     public function edit(Shift $shift)
     {
-        $managers = User::where('role', 'manager')->select('id', 'name')->get();
+        $shift_incharges = User::where('role', 'shift_incharge')->select('id', 'name')->get();
 
         return inertia('shifts/edit', [
             'shift' => $shift,
-            'managers' => $managers,
+            'shift_incharges' => $shift_incharges,
         ]);
     }
 
@@ -60,12 +60,12 @@ class ShiftController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'manager_id' => 'nullable|exists:users,id',
+            'shift_incharge_id' => 'nullable|exists:users,id',
         ]);
 
         $shift->update([
             'name' => $request->name,
-            'manager_id' => $request->manager_id,
+            'shift_incharge_id' => $request->shift_incharge_id,
         ]);
 
         return redirect()->route('shifts.index')->with('success', 'Shift updated successfully!');

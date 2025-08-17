@@ -22,7 +22,7 @@ interface TeamLeaveStats {
     pending: number;
 }
 
-export default function ManagerDashboard() {
+export default function ShiftInchargeDashboard() {
     const { today, teamCount, pendingRequests, teamLeaveStats, teamOnLeaveToday, upcomingLeaves, teamCalendarLeaves } = usePage().props as {
         today: string;
         teamCount: number;

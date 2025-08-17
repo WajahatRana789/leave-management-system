@@ -48,9 +48,9 @@ class LeaveRequestController extends Controller
             'reviewedBy:id,name'
         ]);
 
-        // Managers can only see their team's requests
-        if ($user->role === 'manager') {
-            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+        // Shift_Incharge can only see their team's requests
+        if ($user->role === 'shift_incharge') {
+            $shiftIds = Shift::where('shift_incharge_id', $user->id)->pluck('id');
             $teamUserIds = User::whereIn('shift_id', $shiftIds)
                 ->where('id', '!=', $user->id)
                 ->pluck('id');
@@ -117,9 +117,9 @@ class LeaveRequestController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        // Managers can only view their team's requests
-        if ($user->role === 'manager') {
-            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+        // Shift_Incharge can only view their team's requests
+        if ($user->role === 'shift_incharge') {
+            $shiftIds = Shift::where('shift_incharge_id', $user->id)->pluck('id');
             $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
 
             if (!in_array($leaveRequest->user_id, $teamUserIds->toArray())) {
@@ -392,13 +392,13 @@ class LeaveRequestController extends Controller
     {
         $user = auth()->user();
 
-        // Authorization - only managers/admins can approve, and only for their team if manager
+        // Authorization - only shift_incharge/admins can approve, and only for their team if shift_incharge
         if ($user->role === 'employee') {
             abort(403, 'Unauthorized action.');
         }
 
-        if ($user->role === 'manager') {
-            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+        if ($user->role === 'shift_incharge') {
+            $shiftIds = Shift::where('shift_incharge_id', $user->id)->pluck('id');
             $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
 
             if (!in_array($leaveRequest->user_id, $teamUserIds->toArray())) {
@@ -457,8 +457,8 @@ class LeaveRequestController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        if ($user->role === 'manager') {
-            $shiftIds = Shift::where('manager_id', $user->id)->pluck('id');
+        if ($user->role === 'shift_incharge') {
+            $shiftIds = Shift::where('shift_incharge_id', $user->id)->pluck('id');
             $teamUserIds = User::whereIn('shift_id', $shiftIds)->pluck('id');
 
             if (!in_array($leaveRequest->user_id, $teamUserIds->toArray())) {

@@ -74,7 +74,7 @@ export type TeamMemberOnLeave = {
 
 export type ShiftInfo = {
     name: string;
-    manager?: {
+    shift_incharge?: {
         name: string;
         email: string;
     };

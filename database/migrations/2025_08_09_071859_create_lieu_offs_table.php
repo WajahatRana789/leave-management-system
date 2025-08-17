@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('lieu_offs', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Employee
-            $table->foreignId('granted_by')->constrained('users')->onDelete('cascade'); // Manager or Admin
+            $table->foreignId('granted_by')->constrained('users')->onDelete('cascade'); // Shift Incharge or Admin
             $table->date('work_date'); // The off day they actually worked
             $table->date('expiry_date'); // 2 months from work_date
             $table->enum('status', ['available', 'used', 'expired', 'pending_approval'])->default('available');

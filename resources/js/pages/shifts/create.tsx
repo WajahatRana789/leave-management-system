@@ -7,7 +7,7 @@ import { type BreadcrumbItem, User } from '@/types';
 import { Head, useForm } from '@inertiajs/react';
 
 interface Props {
-    managers: User[];
+    shift_incharges: User[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -16,10 +16,10 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Create Shift', href: 'javascript:void(0)' },
 ];
 
-export default function CreateShift({ managers }: Props) {
+export default function CreateShift({ shift_incharges }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         name: '',
-        manager_id: '',
+        shift_incharge_id: '',
     });
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -45,20 +45,20 @@ export default function CreateShift({ managers }: Props) {
                                 </div>
 
                                 <div>
-                                    <Label htmlFor="manager_id">Shift Incharge*</Label>
-                                    <Select value={data.manager_id} onValueChange={(val) => setData('manager_id', val)}>
-                                        <SelectTrigger id="manager_id" className="w-full">
-                                            <SelectValue placeholder="-- Choose manager --" />
+                                    <Label htmlFor="shift_incharge_id">Shift Incharge*</Label>
+                                    <Select value={data.shift_incharge_id} onValueChange={(val) => setData('shift_incharge_id', val)}>
+                                        <SelectTrigger id="shift_incharge_id" className="w-full">
+                                            <SelectValue placeholder="-- Choose shift_incharge --" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {managers.map((manager) => (
-                                                <SelectItem key={manager.id} value={String(manager.id)}>
-                                                    {manager.name} ({manager.email})
+                                            {shift_incharges.map((shift_incharge) => (
+                                                <SelectItem key={shift_incharge.id} value={String(shift_incharge.id)}>
+                                                    {shift_incharge.name} ({shift_incharge.email})
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.manager_id && <p className="mt-1 text-sm text-red-500">{errors.manager_id}</p>}
+                                    {errors.shift_incharge_id && <p className="mt-1 text-sm text-red-500">{errors.shift_incharge_id}</p>}
                                 </div>
                             </div>
 

@@ -266,11 +266,11 @@ export default function EmployeeDashboard() {
                                             <strong>Shift:</strong> {shiftInfo.name}
                                         </span>
                                     </p>
-                                    {shiftInfo.manager && (
+                                    {shiftInfo.shift_incharge && (
                                         <p className="flex items-center gap-2">
                                             <User className="h-4 w-4 text-gray-500" />
                                             <span>
-                                                <strong>Shift Incharge:</strong> {shiftInfo.manager.name} ({shiftInfo.manager.email})
+                                                <strong>Shift Incharge:</strong> {shiftInfo.shift_incharge.name} ({shiftInfo.shift_incharge.email})
                                             </span>
                                         </p>
                                     )}

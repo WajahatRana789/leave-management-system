@@ -32,7 +32,7 @@ interface LieuLeave {
         shift?: {
             id: number;
             name: string;
-            manager_id: number;
+            shift_incharge_id: number;
         };
     };
     granted_by_user: { id: number; name: string };
@@ -96,22 +96,22 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
                 const lieuLeave = row.original;
                 const currentUser = auth.user;
 
-                // Check if current user is the manager of this employee
-                const isTeamManager = currentUser.role === 'manager' && lieuLeave.user?.shift?.manager_id === currentUser.id;
+                // Check if current user is the shift_incharge of this employee
+                const isTeamShiftIncharge = currentUser.role === 'shift_incharge' && lieuLeave.user?.shift?.shift_incharge_id === currentUser.id;
 
                 // Check if current user granted this leave
                 const isGrantedByCurrentUser = currentUser.id === lieuLeave.granted_by_user?.id;
 
                 // Admins/Super Admins can edit any lieu leave
-                // Managers can edit leaves for their team members
-                const canEdit = ['admin', 'super_admin'].includes(currentUser.role) || (currentUser.role === 'manager' && isTeamManager);
+                // Shift Incharges can edit leaves for their team members
+                const canEdit = ['admin', 'super_admin'].includes(currentUser.role) || (currentUser.role === 'shift_incharge' && isTeamShiftIncharge);
 
                 // Only available status can be deleted
-                // Managers can only delete leaves they granted for their team members
+                // Shift Incharges can only delete leaves they granted for their team members
                 const canDelete =
                     lieuLeave.status === 'available' &&
                     (['admin', 'super_admin'].includes(currentUser.role) ||
-                        (currentUser.role === 'manager' && isTeamManager && isGrantedByCurrentUser));
+                        (currentUser.role === 'shift_incharge' && isTeamShiftIncharge && isGrantedByCurrentUser));
 
                 return (
                     <div className="flex items-center gap-2">
@@ -171,7 +171,7 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Lieu Leaves</h1>
-                    {['manager', 'admin', 'super_admin'].includes(auth.user.role) && (
+                    {['shift_incharge', 'admin', 'super_admin'].includes(auth.user.role) && (
                         <Button asChild>
                             <Link href={route('lieu-leaves.create')}>Grant Lieu Leave</Link>
                         </Button>

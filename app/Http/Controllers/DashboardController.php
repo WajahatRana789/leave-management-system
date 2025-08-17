@@ -79,8 +79,8 @@ class DashboardController extends Controller
             ->where('status', 'approved')
             ->get();
 
-        // Shift and manager info
-        $shift = Shift::with('manager')->find($user->shift_id);
+        // Shift and shift_incharge info
+        $shift = Shift::with('shift_incharge')->find($user->shift_id);
 
         // Personal leaves for calendar
         $calendarLeaves = LeaveRequest::with('leaveType')
@@ -127,9 +127,9 @@ class DashboardController extends Controller
             'teamCalendarLeaves' => $teamCalendarLeaves,
             'shiftInfo' => $shift ? [
                 'name' => $shift->name,
-                'manager' => [
-                    'name' => $shift->manager?->name,
-                    'email' => $shift->manager?->email,
+                'shift_incharge' => [
+                    'name' => $shift->shift_incharge?->name,
+                    'email' => $shift->shift_incharge?->email,
                 ],
             ] : null,
             'designationInfo' => $user->designation ? [
@@ -139,18 +139,18 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function managerDashboard(Request $request)
+    public function shift_inchargeDashboard(Request $request)
     {
         $user = $request->user();
         $today = Carbon::today();
         $currentYear = $today->year;
 
-        // Get the shift this manager manages
-        $managedShift = Shift::where('manager_id', $user->id)->first();
+        // Get the shift this shift_incharge manages
+        $managedShift = Shift::where('shift_incharge_id', $user->id)->first();
 
         if (!$managedShift) {
-            return Inertia::render('dashboards/manager-dashboard', [
-                'error' => 'You are not assigned as a manager for any shift',
+            return Inertia::render('dashboards/shift-incharge-dashboard', [
+                'error' => 'You are not assigned as a shift_incharge for any shift',
                 'today' => $today->format('D d M, Y'),
                 'teamCount' => 0,
                 'pendingRequests' => [],
@@ -166,7 +166,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Get all users in this shift (excluding the manager)
+        // Get all users in this shift (excluding the shift_incharge)
         $managedUsers = User::where('shift_id', $managedShift->id)
             ->where('id', '!=', $user->id)
             ->get();
@@ -234,7 +234,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        return Inertia::render('dashboards/manager-dashboard', [
+        return Inertia::render('dashboards/shift-incharge-dashboard', [
             'today' => $today->format('D d M, Y'),
             'shiftName' => $managedShift->name,
             'teamCount' => $managedUsers->count(),

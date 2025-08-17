@@ -86,7 +86,7 @@ export default function CreateUser({ shifts, designations }: Props) {
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="employee">Employee</SelectItem>
-                                            <SelectItem value="manager">Manager</SelectItem>
+                                            <SelectItem value="shift_incharge">Shift Incharge</SelectItem>
                                             <SelectItem value="admin">Admin</SelectItem>
                                         </SelectContent>
                                     </Select>

@@ -3,7 +3,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import AdminDashboard from './dashboards/admin-dashboard';
 import EmployeeDashboard from './dashboards/employee-dashboard';
-import ManagerDashboard from './dashboards/manager-dashboard';
+import ShiftInchargeDashboard from './dashboards/shift-incharge-dashboard';
 import SuperAdminDashboard from './dashboards/super-admin-dashboard';
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -20,7 +20,7 @@ export default function Dashboard() {
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
                 {user.role === 'employee' && <EmployeeDashboard />}
-                {user.role === 'manager' && <ManagerDashboard />}
+                {user.role === 'shift_incharge' && <ShiftInchargeDashboard />}
                 {user.role === 'admin' && <AdminDashboard />}
                 {user.role === 'super_admin' && <SuperAdminDashboard />}
             </div>

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('total_days');
             $table->string('reason')->nullable(); // Reason for leave
             $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
-            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete(); // Shift manager
+            $table->foreignId('reviewed_by')->nullable()->constrained('users')->nullOnDelete(); // Shift shift_incharge
             $table->timestamp('reviewed_at')->nullable();
             $table->text('remarks')->nullable();
             $table->timestamps();
