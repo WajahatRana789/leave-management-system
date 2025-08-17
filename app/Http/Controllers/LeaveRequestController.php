@@ -145,11 +145,13 @@ class LeaveRequestController extends Controller
     public function create()
     {
         $user = Auth::user();
+        $currentYear = now()->year;
 
-        $leaveTypes = LeaveType::all()->map(function ($type) use ($user) {
+        $leaveTypes = LeaveType::all()->map(function ($type) use ($user, $currentYear) {
             $usedDays = LeaveRequest::where('user_id', $user->id)
                 ->where('leave_type_id', $type->id)
                 ->whereIn('status', ['approved', 'pending'])
+                ->whereYear('from_date', $currentYear)
                 ->sum('total_days');
 
             return [
