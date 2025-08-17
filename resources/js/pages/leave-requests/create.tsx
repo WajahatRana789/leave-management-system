@@ -72,48 +72,47 @@ export default function CreateLeaveRequest({ leaveTypes, availableLieuOffs, avai
                 <div className="pt-4">
                     <form onSubmit={handleSubmit}>
                         <div className="space-y-4">
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                                {/* Leave Type */}
-                                <div>
-                                    <Label htmlFor="leave_type_id">Leave Type*</Label>
-                                    <Select
-                                        value={data.leave_type_id}
-                                        onValueChange={(value) => {
-                                            setData('leave_type_id', value);
-                                            setData('lieu_off_id', '');
-                                            setData('is_lieu_off', false);
-                                        }}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select leave type" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {leaveTypes.map((type) => {
-                                                const isLieu = type.key === 'lieu_leave';
-                                                const isDisabled = isLieu ? availableLieuOffCount <= 0 : type.remaining <= 0;
+                            {/* Leave Type */}
+                            <div>
+                                <Label htmlFor="leave_type_id">Leave Type*</Label>
+                                <Select
+                                    value={data.leave_type_id}
+                                    onValueChange={(value) => {
+                                        setData('leave_type_id', value);
+                                        setData('lieu_off_id', '');
+                                        setData('is_lieu_off', false);
+                                    }}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select leave type" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {leaveTypes.map((type) => {
+                                            const isLieu = type.key === 'lieu_leave';
+                                            const isDisabled = isLieu ? availableLieuOffCount <= 0 : type.remaining <= 0;
 
-                                                return (
-                                                    <SelectItem
-                                                        key={type.id}
-                                                        value={String(type.id)}
-                                                        disabled={isDisabled}
-                                                        className={isDisabled ? 'opacity-50' : ''}
-                                                    >
-                                                        {type.name} ({isLieu ? availableLieuOffCount : type.remaining})
-                                                    </SelectItem>
-                                                );
-                                            })}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.leave_type_id && <p className="text-sm text-red-500">{errors.leave_type_id}</p>}
-                                    {remainingBalance !== null && (
-                                        <p className={`mt-1 text-xs ${remainingBalance <= 0 ? 'text-red-500' : 'text-gray-500'}`}>
-                                            Available balance: {remainingBalance} day{remainingBalance !== 1 ? 's' : ''}
-                                            {remainingBalance <= 0 && ' - You cannot apply for this leave type'}
-                                        </p>
-                                    )}
-                                </div>
-
+                                            return (
+                                                <SelectItem
+                                                    key={type.id}
+                                                    value={String(type.id)}
+                                                    disabled={isDisabled}
+                                                    className={isDisabled ? 'opacity-50' : ''}
+                                                >
+                                                    {type.name} ({isLieu ? availableLieuOffCount : type.remaining})
+                                                </SelectItem>
+                                            );
+                                        })}
+                                    </SelectContent>
+                                </Select>
+                                {errors.leave_type_id && <p className="text-sm text-red-500">{errors.leave_type_id}</p>}
+                                {remainingBalance !== null && (
+                                    <p className={`mt-1 text-xs ${remainingBalance <= 0 ? 'text-red-500' : 'text-gray-500'}`}>
+                                        Available balance: {remainingBalance} day{remainingBalance !== 1 ? 's' : ''}
+                                        {remainingBalance <= 0 && ' - You cannot apply for this leave type'}
+                                    </p>
+                                )}
+                            </div>
+                            <div>
                                 {/* Lieu Off Date Selection */}
                                 {selectedLeaveType?.key === 'lieu_leave' && availableLieuOffs.length > 0 && (
                                     <div>
@@ -139,7 +138,8 @@ export default function CreateLeaveRequest({ leaveTypes, availableLieuOffs, avai
                                         {errors.lieu_off_id && <p className="text-sm text-red-500">{errors.lieu_off_id}</p>}
                                     </div>
                                 )}
-
+                            </div>
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 {/* From Date */}
                                 <div>
                                     <Label htmlFor="from_date">From Date*</Label>
