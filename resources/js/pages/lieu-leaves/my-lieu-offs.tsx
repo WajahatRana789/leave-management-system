@@ -268,6 +268,12 @@ export default function MyLieuOffsPage({ lieuOffs, leaveTypeId }: MyLieuOffsProp
                                 }}
                                 required
                             />
+                            {selectedLieuOff && (
+                                <div className="mt-2 mb-3 px-2 text-sm text-gray-500">
+                                    <div>Expiry: {formatDisplay(selectedLieuOff?.expiry_date)}</div>
+                                </div>
+                            )}
+
                             {errors.from_date && <p className="text-sm text-red-500">{errors.from_date}</p>}
                         </div>
                         <div>
