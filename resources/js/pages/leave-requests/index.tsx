@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { Head, Link, router } from '@inertiajs/react';
 
 interface User {
@@ -73,8 +74,8 @@ export default function MyLeaveRequests({ requests, authUser }: Props) {
                             {requests.data.map((request) => (
                                 <tr key={request.id}>
                                     <td className="px-4 py-2">{request.leave_type.name}</td>
-                                    <td className="px-4 py-2">{request.from_date}</td>
-                                    <td className="px-4 py-2">{request.to_date}</td>
+                                    <td className="px-4 py-2">{formatDisplay(request.from_date)}</td>
+                                    <td className="px-4 py-2">{formatDisplay(request.to_date)}</td>
                                     <td className="px-4 py-2">{request.total_days}</td>
                                     <td className="px-4 py-2">{request.reason}</td>
                                     <td className="px-4 py-2 capitalize">
