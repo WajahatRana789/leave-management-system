@@ -83,7 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     Route::middleware(['role:shift_incharge'])->group(function () {
-        Route::get('/dashboard/shift-incharge', [DashboardController::class, 'shift_inchargeDashboard'])->name('shift_incharge.dashboard');
+        Route::get('/dashboard/shift-incharge', [DashboardController::class, 'shiftInchargeDashboard'])->name('shift_incharge.dashboard');
     });
 
     Route::middleware(['role:employee'])->group(function () {

@@ -139,11 +139,62 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function shift_inchargeDashboard(Request $request)
+    public function shiftInchargeDashboard(Request $request)
     {
-        $user = $request->user();
+        $user = $request->user()->load(['designation']);
         $today = Carbon::today();
         $currentYear = $today->year;
+
+        // Regular leave balance by type (excluding lieu_leave)
+        $leaveTypes = LeaveType::where('key', '!=', 'lieu_leave')->get();
+        $usedDays = LeaveRequest::where('user_id', $user->id)
+            ->where('status', 'approved')
+            ->whereYear('from_date', $currentYear)
+            ->whereYear('to_date', $currentYear)
+            ->select('leave_type_id', DB::raw('SUM(total_days) as used'))
+            ->groupBy('leave_type_id')
+            ->pluck('used', 'leave_type_id');
+
+        $leaveBalances = $leaveTypes->map(function ($type) use ($usedDays) {
+            $used = $usedDays[$type->id] ?? 0;
+            return [
+                'id' => $type->id,
+                'name' => $type->name,
+                'key' => $type->key,
+                'default_days' => $type->default_days,
+                'used_days' => $used,
+                'remaining_days' => max(0, $type->default_days - $used),
+            ];
+        });
+
+        // Calculate lieu_off balance separately
+        $lieuOffBalance = [
+            'available' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'available')
+                ->where('expiry_date', '>=', $today)
+                ->count(),
+            'pending' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'pending_approval')
+                ->count(),
+            'expired' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'expired')
+                ->count(),
+            'used' => DB::table('lieu_offs')
+                ->where('user_id', $user->id)
+                ->where('status', 'used')
+                ->count(),
+        ];
+
+        // Recent applications (current year only)
+        $recentLeaves = LeaveRequest::with('leaveType')
+            ->where('user_id', $user->id)
+            ->whereYear('created_at', $currentYear)
+            ->latest()
+            ->take(5)
+            ->get();
 
         // Get the shift this shift_incharge manages
         $managedShift = Shift::where('shift_incharge_id', $user->id)->first();
@@ -236,6 +287,14 @@ class DashboardController extends Controller
 
         return Inertia::render('dashboards/shift-incharge-dashboard', [
             'today' => $today->format('D d M, Y'),
+            'user' => $user,
+            'leaveBalances' => $leaveBalances,
+            'lieuOffBalance' => $lieuOffBalance,
+            'recentLeaves' => $recentLeaves,
+            'designationInfo' => $user->designation ? [
+                'id' => $user->designation->id,
+                'title' => $user->designation->title,
+            ] : null,
             'shiftName' => $managedShift->name,
             'teamCount' => $managedUsers->count(),
             'pendingRequests' => $pendingRequests,
