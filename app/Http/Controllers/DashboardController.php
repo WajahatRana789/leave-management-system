@@ -312,6 +312,75 @@ class DashboardController extends Controller
 
     public function superAdminDashboard(Request $request)
     {
-        return Inertia::render('dashboards/super-admin-dashboard', []);
+        $user = $request->user()->load(['designation']);
+        $today = Carbon::today();
+        $currentYear = $today->year;
+
+        // User stats
+        $totalUsers = User::count();
+        $totalShiftIncharges = User::whereHas('shift', fn($q) => $q->whereColumn('shift_incharge_id', 'users.id'))->count();
+        $totalEmployees = User::where('role', 'employee')->count();
+
+        // Shift stats
+        $totalShifts = Shift::count();
+
+        // Leave request stats
+        $leaveStats = LeaveRequest::whereYear('created_at', $currentYear)
+            ->select(
+                DB::raw('count(*) as total_requests'),
+                DB::raw('sum(case when status = "approved" then 1 else 0 end) as approved'),
+                DB::raw('sum(case when status = "rejected" then 1 else 0 end) as rejected'),
+                DB::raw('sum(case when status = "pending" then 1 else 0 end) as pending')
+            )
+            ->first();
+
+        // All members on leave today
+        $onLeaveToday = LeaveRequest::with(['user', 'leaveType'])
+            ->whereDate('from_date', '<=', $today)
+            ->whereDate('to_date', '>=', $today)
+            ->where('status', 'approved')
+            ->get();
+
+        // Upcoming leaves (next 7 days)
+        $upcomingLeaves = LeaveRequest::with(['user', 'leaveType'])
+            ->whereDate('from_date', '>=', $today)
+            ->whereDate('from_date', '<=', $today->copy()->addDays(7))
+            ->whereIn('status', ['approved', 'pending'])
+            ->orderBy('from_date')
+            ->get();
+
+        // Lieu off stats (system-wide)
+        $lieuOffStats = [
+            'available' => DB::table('lieu_offs')
+                ->where('status', 'available')
+                ->where('expiry_date', '>=', $today)
+                ->count(),
+            'pending' => DB::table('lieu_offs')->where('status', 'pending_approval')->count(),
+            'expired' => DB::table('lieu_offs')->where('status', 'expired')->count(),
+            'used' => DB::table('lieu_offs')->where('status', 'used')->count(),
+        ];
+
+        return Inertia::render('dashboards/super-admin-dashboard', [
+            'today' => $today->format('D d M, Y'),
+            'user' => $user,
+
+            // Users
+            'totalUsers' => $totalUsers,
+            'totalShiftIncharges' => $totalShiftIncharges,
+            'totalEmployees' => $totalEmployees,
+
+            // Shifts
+            'totalShifts' => $totalShifts,
+
+            // Leave Stats
+            'leaveStats' => $leaveStats,
+
+            // Today & Upcoming
+            'onLeaveToday' => $onLeaveToday,
+            'upcomingLeaves' => $upcomingLeaves,
+
+            // Lieu Off
+            'lieuOffStats' => $lieuOffStats,
+        ]);
     }
 }
