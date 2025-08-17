@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
@@ -50,8 +51,20 @@ export default function MyLieuOffsPage({ lieuOffs, leaveTypeId }: MyLieuOffsProp
     });
 
     const columns: ColumnDef<LieuOff>[] = [
-        { accessorKey: 'work_date', header: 'Work Date' },
-        { accessorKey: 'expiry_date', header: 'Expiry Date' },
+        {
+            accessorKey: 'work_date',
+            header: 'Work Date',
+            cell: ({ row }) => {
+                return formatDisplay(row.original.work_date);
+            },
+        },
+        {
+            accessorKey: 'expiry_date',
+            header: 'Expiry Date',
+            cell: ({ row }) => {
+                return formatDisplay(row.original.expiry_date);
+            },
+        },
         {
             accessorKey: 'status',
             header: 'Status',
@@ -249,7 +262,7 @@ export default function MyLieuOffsPage({ lieuOffs, leaveTypeId }: MyLieuOffsProp
                     </DialogHeader>
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <Label>From Date*</Label>
+                            <Label>Leave Date*</Label>
                             <Input
                                 type="date"
                                 value={data.from_date}
@@ -260,11 +273,6 @@ export default function MyLieuOffsPage({ lieuOffs, leaveTypeId }: MyLieuOffsProp
                                 required
                             />
                             {errors.from_date && <p className="text-sm text-red-500">{errors.from_date}</p>}
-                        </div>
-                        <div>
-                            <Label>To Date*</Label>
-                            <Input type="date" value={data.to_date} readOnly />
-                            {errors.to_date && <p className="text-sm text-red-500">{errors.to_date}</p>}
                         </div>
                         <div>
                             <Label>Reason</Label>
