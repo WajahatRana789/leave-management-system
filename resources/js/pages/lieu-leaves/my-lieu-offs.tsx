@@ -76,11 +76,7 @@ export default function MyLieuOffsPage({ lieuOffs, leaveTypeId }: MyLieuOffsProp
                     expired: 'bg-gray-100 text-gray-800',
                     pending_approval: 'bg-yellow-100 text-yellow-800',
                 };
-                return (
-                    <span className={`rounded-full px-2 py-1 text-xs font-medium ${statusColors[status]}`}>
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </span>
-                );
+                return <span className={`rounded-full px-2 py-1 text-xs font-medium ${statusColors[status]}`}>{status?.toUpperCase()}</span>;
             },
         },
         {
