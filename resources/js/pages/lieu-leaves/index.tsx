@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
@@ -60,8 +61,20 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
         { accessorKey: 'user.name', header: 'Employee', cell: ({ row }) => row.original.user?.name || '-' },
         { accessorKey: 'user.shift.name', header: 'Shift', cell: ({ row }) => row.original.user?.shift?.name || '-' },
         { accessorKey: 'granted_by_user.name', header: 'Granted By', cell: ({ row }) => row.original.granted_by_user?.name || '-' },
-        { accessorKey: 'work_date', header: 'Work Date' },
-        { accessorKey: 'expiry_date', header: 'Expiry Date' },
+        {
+            accessorKey: 'work_date',
+            header: 'Work Date',
+            cell: ({ row }) => {
+                return formatDisplay(row.original.work_date);
+            },
+        },
+        {
+            accessorKey: 'expiry_date',
+            header: 'Expiry Date',
+            cell: ({ row }) => {
+                return formatDisplay(row.original.expiry_date);
+            },
+        },
         {
             accessorKey: 'status',
             header: 'Status',

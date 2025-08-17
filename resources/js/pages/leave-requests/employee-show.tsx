@@ -191,7 +191,7 @@ export default function EmployeeRequestShow({ request, canReview, authUser }: Pr
                                     <FileText className="mr-2 h-5 w-5 text-gray-400" />
                                     Reason
                                 </h3>
-                                <p className="mt-2 rounded bg-gray-50 p-3 text-sm text-gray-700">{request.reason || 'No reason provided'}</p>
+                                <p className="mt-2 rounded text-sm text-gray-700">{request.reason || 'No reason provided'}</p>
                             </div>
 
                             {request.status !== 'pending' && (
