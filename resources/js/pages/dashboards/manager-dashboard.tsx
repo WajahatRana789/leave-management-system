@@ -1,6 +1,7 @@
 import EmployeeLeaveCalendar from '@/components/EmployeeLeaveCalendar';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
+import { formatDisplay } from '@/lib/date';
 import { LeaveRequest, TeamMemberOnLeave, type BreadcrumbItem } from '@/types';
 import { Dialog } from '@headlessui/react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
@@ -39,7 +40,7 @@ export default function ManagerDashboard() {
     const oldestPending = pendingRequests.length ? Math.min(...pendingRequests.map((r) => new Date(r.created_at).getTime())) : null;
 
     const formatDateRange = (from: string, to: string) => {
-        return from === to ? from : `${from} – ${to}`;
+        return from === to ? from : `${formatDisplay(from)} - ${formatDisplay(to)}`;
     };
 
     const handleApprove = (id: number) => {
@@ -163,8 +164,8 @@ export default function ManagerDashboard() {
                                             <tr key={request.id} className="border-t">
                                                 <td className="p-3">{request.user.name}</td>
                                                 <td className="p-3">{request.leave_type.name}</td>
-                                                <td className="p-3">{request.from_date}</td>
-                                                <td className="p-3">{request.to_date}</td>
+                                                <td className="p-3">{formatDisplay(request.from_date)}</td>
+                                                <td className="p-3">{formatDisplay(request.to_date)}</td>
                                                 <td className="p-3">{request.total_days}</td>
                                                 <td className="px-4 py-2">{request.reason}</td>
                                                 <td className="px-4 py-2 capitalize">
