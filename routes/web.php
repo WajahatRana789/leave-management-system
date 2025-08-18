@@ -58,6 +58,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Login/Logout Logs
         Route::get('/login-logs', [LoginLogController::class, 'index'])->name('login-logs.index');
+        Route::get('/employee-login-logs/{user?}', [LoginLogController::class, 'employeeLogs'])
+            ->name('employee-logs.index');
     });
 
 

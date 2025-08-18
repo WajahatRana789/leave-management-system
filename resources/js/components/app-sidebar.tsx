@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { CalendarCheck2, CalendarPlus, Clock, LayoutGrid, List, ListChecks, LogIn, Send, Users2Icon } from 'lucide-react';
+import { Activity, CalendarCheck2, CalendarPlus, Clock, LayoutGrid, List, ListChecks, LogIn, Send, Users2Icon } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const navItems: (NavItem & { roles: string[] })[] = [
@@ -66,6 +66,12 @@ const navItems: (NavItem & { roles: string[] })[] = [
         title: 'Login Logs',
         href: '/login-logs',
         icon: LogIn,
+        roles: ['super_admin'],
+    },
+    {
+        title: 'Employee Login Logs',
+        href: '/employee-login-logs',
+        icon: Activity,
         roles: ['super_admin'],
     },
 ];
