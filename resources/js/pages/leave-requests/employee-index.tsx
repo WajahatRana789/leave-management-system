@@ -100,6 +100,7 @@ export default function EmployeeLeaveRequests({ requests, authUser, canReview }:
                                 <th className="px-4 py-2">Days</th>
                                 <th className="px-4 py-2">Reason</th>
                                 <th className="px-4 py-2">Status</th>
+                                <th className="px-4 py-2">Applied On</th>
                                 <th className="px-4 py-2">Actions</th>
                             </tr>
                         </thead>
@@ -125,6 +126,7 @@ export default function EmployeeLeaveRequests({ requests, authUser, canReview }:
                                             {request.status}
                                         </span>
                                     </td>
+                                    <td className="px-4 py-2">{formatDisplay(request.created_at)}</td>
                                     <td className="px-4 py-2">
                                         <div className="flex gap-2">
                                             <Button size="sm" variant="outline" asChild>
