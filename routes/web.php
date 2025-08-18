@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LeaveRequestController;
 use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\LieuOffController;
+use App\Http\Controllers\LoginLogController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
@@ -27,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         };
     })->name('dashboard');
 
+    // Super Admin Only
     Route::middleware(['role:super_admin'])->group(function () {
         // Dashboard
         Route::get('/dashboard/superadmin', [DashboardController::class, 'superAdminDashboard'])->name('superadmin.dashboard');
@@ -53,6 +55,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/leave-types/{leaveType}/edit', [LeaveTypeController::class, 'edit'])->name('leave-types.edit');
         Route::put('/leave-types/{leaveType}', [LeaveTypeController::class, 'update'])->name('leave-types.update');
         Route::delete('/leave-types/{leaveType}', [LeaveTypeController::class, 'destroy'])->name('leave-types.destroy');
+
+        // Login/Logout Logs
+        Route::get('/login-logs', [LoginLogController::class, 'index'])->name('login-logs.index');
     });
 
 

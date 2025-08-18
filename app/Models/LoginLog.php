@@ -14,4 +14,9 @@ class LoginLog extends Model
     ];
 
     public $timestamps = false; // only using created_at
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
