@@ -85,6 +85,11 @@ export default function MyLieuOffsPage({ lieuOffs, leaveTypeId }: MyLieuOffsProp
             cell: ({ row }) => row.original.granted_by_user?.name || '-',
         },
         {
+            accessorKey: 'granted_by_user.created_at',
+            header: 'Granted At',
+            cell: ({ row }) => formatDisplay(row.original.granted_by_user?.created_at),
+        },
+        {
             accessorKey: 'remarks',
             header: 'Reason',
             cell: ({ row }) => row.original?.remarks || '',
