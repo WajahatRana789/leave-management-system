@@ -197,12 +197,21 @@ class DashboardController extends Controller
             ->get();
 
         // Get the shift this shift_incharge manages
-        $managedShift = Shift::where('shift_incharge_id', $user->id)->first();
+        $shiftIncharge = Shift::where('shift_incharge_id', $user->id)->first();
 
-        if (!$managedShift) {
+        if (!$shiftIncharge) {
             return Inertia::render('dashboards/shift-incharge-dashboard', [
-                'error' => 'You are not assigned as a shift_incharge for any shift',
+                'isShiftIncharge' => false,
+                'shiftInchargeError' => "Dear {$user->name}, you are not currently assigned as a Shift Incharge for any shift. Please contact your system administrator to have a shift assigned before you can access the Shift Incharge Dashboard.",
                 'today' => $today->format('D d M, Y'),
+                'user' => $user,
+                'leaveBalances' => [],
+                'lieuOffBalance' => [],
+                'recentLeaves' => [],
+                'designationInfo' => $user->designation ? [
+                    'id' => $user->designation->id,
+                    'title' => $user->designation->title,
+                ] : null,
                 'teamCount' => 0,
                 'pendingRequests' => [],
                 'teamLeaveStats' => [
@@ -218,7 +227,7 @@ class DashboardController extends Controller
         }
 
         // Get all users in this shift (excluding the shift_incharge)
-        $managedUsers = User::where('shift_id', $managedShift->id)
+        $managedUsers = User::where('shift_id', $shiftIncharge->id)
             ->where('id', '!=', $user->id)
             ->get();
         $managedUserIds = $managedUsers->pluck('id');
@@ -295,7 +304,7 @@ class DashboardController extends Controller
                 'id' => $user->designation->id,
                 'title' => $user->designation->title,
             ] : null,
-            'shiftName' => $managedShift->name,
+            'shiftName' => $shiftIncharge->name,
             'teamCount' => $managedUsers->count(),
             'pendingRequests' => $pendingRequests,
             'teamLeaveStats' => $teamLeaveStats,
