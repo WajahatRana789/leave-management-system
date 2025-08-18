@@ -71,7 +71,7 @@ export default function MyLeaveRequests({ requests, authUser }: Props) {
                                 <th className="px-4 py-2">Days</th>
                                 <th className="px-4 py-2">Reason</th>
                                 <th className="px-4 py-2">Status</th>
-                                <th className="px-4 py-2">Created Date</th>
+                                <th className="px-4 py-2">Submitted on</th>
                                 <th className="px-4 py-2">Actions</th>
                             </tr>
                         </thead>
