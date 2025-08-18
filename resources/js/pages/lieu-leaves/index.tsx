@@ -56,11 +56,15 @@ export default function LieuLeavesPage({ lieuLeaves }: LieuLeavesProps) {
     const [deleteId, setDeleteId] = useState<number | null>(null);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const { auth } = usePage().props as any;
-
     const columns: ColumnDef<LieuLeave>[] = [
         { accessorKey: 'user.name', header: 'Employee', cell: ({ row }) => row.original.user?.name || '-' },
         { accessorKey: 'user.shift.name', header: 'Shift', cell: ({ row }) => row.original.user?.shift?.name || '-' },
         { accessorKey: 'granted_by_user.name', header: 'Granted By', cell: ({ row }) => row.original.granted_by_user?.name || '-' },
+        {
+            accessorKey: 'granted_by_user.created_at',
+            header: 'Granted At',
+            cell: ({ row }) => formatDisplay(row.original.granted_by_user?.created_at),
+        },
         {
             accessorKey: 'work_date',
             header: 'Work Date',
