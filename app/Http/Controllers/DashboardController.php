@@ -315,14 +315,37 @@ class DashboardController extends Controller
         $user = $request->user()->load(['designation']);
         $today = Carbon::today();
         $currentYear = $today->year;
+        $lastMonth = $today->copy()->subMonth();
 
         // User stats
         $totalUsers = User::count();
         $totalShiftIncharges = User::whereHas('shift', fn($q) => $q->whereColumn('shift_incharge_id', 'users.id'))->count();
         $totalEmployees = User::where('role', 'employee')->count();
+        $activeUsers = User::whereHas('leaveRequests', function ($q) use ($currentYear) {
+            $q->whereYear('created_at', $currentYear);
+        })->count();
+
+        // User growth metrics
+        $userGrowth = [
+            'this_month' => User::whereYear('created_at', $currentYear)
+                ->whereMonth('created_at', $today->month)
+                ->count(),
+            'last_month' => User::whereYear('created_at', $lastMonth->year)
+                ->whereMonth('created_at', $lastMonth->month)
+                ->count(),
+            'this_year' => User::whereYear('created_at', $currentYear)->count(),
+            'last_year' => User::whereYear('created_at', $currentYear - 1)->count(),
+        ];
+
+        // User role distribution
+        $roleDistribution = User::select('role', DB::raw('count(*) as count'))
+            ->groupBy('role')
+            ->pluck('count', 'role');
 
         // Shift stats
         $totalShifts = Shift::count();
+        $shiftsWithoutIncharge = Shift::whereNull('shift_incharge_id')->count();
+        $shiftStats = Shift::withCount('users')->get();
 
         // Leave request stats
         $leaveStats = LeaveRequest::whereYear('created_at', $currentYear)
@@ -330,19 +353,64 @@ class DashboardController extends Controller
                 DB::raw('count(*) as total_requests'),
                 DB::raw('sum(case when status = "approved" then 1 else 0 end) as approved'),
                 DB::raw('sum(case when status = "rejected" then 1 else 0 end) as rejected'),
-                DB::raw('sum(case when status = "pending" then 1 else 0 end) as pending')
+                DB::raw('sum(case when status = "pending" then 1 else 0 end) as pending'),
+                DB::raw('sum(total_days) as total_days')
             )
             ->first();
 
+        // Leave type breakdown - using separate queries to avoid complex relationships
+        $leaveTypes = LeaveType::all();
+        $leaveTypeStats = $leaveTypes->map(function ($type) use ($currentYear) {
+            $total = LeaveRequest::where('leave_type_id', $type->id)
+                ->whereYear('created_at', $currentYear)
+                ->count();
+            $approved = LeaveRequest::where('leave_type_id', $type->id)
+                ->where('status', 'approved')
+                ->whereYear('created_at', $currentYear)
+                ->count();
+            $rejected = LeaveRequest::where('leave_type_id', $type->id)
+                ->where('status', 'rejected')
+                ->whereYear('created_at', $currentYear)
+                ->count();
+            $pending = LeaveRequest::where('leave_type_id', $type->id)
+                ->where('status', 'pending')
+                ->whereYear('created_at', $currentYear)
+                ->count();
+
+            return [
+                'id' => $type->id,
+                'name' => $type->name,
+                'key' => $type->key,
+                'default_days' => $type->default_days,
+                'total_requests' => $total,
+                'approved_requests' => $approved,
+                'rejected_requests' => $rejected,
+                'pending_requests' => $pending,
+            ];
+        });
+
+        // Monthly leave trends
+        $monthlyLeaveTrends = LeaveRequest::select(
+            DB::raw('MONTH(created_at) as month'),
+            DB::raw('count(*) as total'),
+            DB::raw('sum(case when status = "approved" then 1 else 0 end) as approved'),
+            DB::raw('sum(case when status = "rejected" then 1 else 0 end) as rejected'),
+            DB::raw('sum(case when status = "pending" then 1 else 0 end) as pending')
+        )
+            ->whereYear('created_at', $currentYear)
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
         // All members on leave today
-        $onLeaveToday = LeaveRequest::with(['user', 'leaveType'])
+        $onLeaveToday = LeaveRequest::with(['user', 'leaveType', 'user.shift'])
             ->whereDate('from_date', '<=', $today)
             ->whereDate('to_date', '>=', $today)
             ->where('status', 'approved')
             ->get();
 
         // Upcoming leaves (next 7 days)
-        $upcomingLeaves = LeaveRequest::with(['user', 'leaveType'])
+        $upcomingLeaves = LeaveRequest::with(['user', 'leaveType', 'user.shift'])
             ->whereDate('from_date', '>=', $today)
             ->whereDate('from_date', '<=', $today->copy()->addDays(7))
             ->whereIn('status', ['approved', 'pending'])
@@ -358,7 +426,11 @@ class DashboardController extends Controller
             'pending' => DB::table('lieu_offs')->where('status', 'pending_approval')->count(),
             'expired' => DB::table('lieu_offs')->where('status', 'expired')->count(),
             'used' => DB::table('lieu_offs')->where('status', 'used')->count(),
+            'total_granted' => DB::table('lieu_offs')->count(),
         ];
+
+        // Designation stats
+        $designationStats = Designation::withCount('users')->get();
 
         return Inertia::render('dashboards/super-admin-dashboard', [
             'today' => $today->format('D d M, Y'),
@@ -368,12 +440,19 @@ class DashboardController extends Controller
             'totalUsers' => $totalUsers,
             'totalShiftIncharges' => $totalShiftIncharges,
             'totalEmployees' => $totalEmployees,
+            'activeUsers' => $activeUsers,
+            'userGrowth' => $userGrowth,
+            'roleDistribution' => $roleDistribution,
 
             // Shifts
             'totalShifts' => $totalShifts,
+            'shiftsWithoutIncharge' => $shiftsWithoutIncharge,
+            'shiftStats' => $shiftStats,
 
             // Leave Stats
             'leaveStats' => $leaveStats,
+            'leaveTypeStats' => $leaveTypeStats,
+            'monthlyLeaveTrends' => $monthlyLeaveTrends,
 
             // Today & Upcoming
             'onLeaveToday' => $onLeaveToday,
@@ -381,6 +460,9 @@ class DashboardController extends Controller
 
             // Lieu Off
             'lieuOffStats' => $lieuOffStats,
+
+            // Designations
+            'designationStats' => $designationStats,
         ]);
     }
 }
