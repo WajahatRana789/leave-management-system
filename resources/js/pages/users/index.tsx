@@ -3,6 +3,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
+import { format } from 'date-fns';
 import { Pencil, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -18,6 +19,7 @@ interface User {
     name: string;
     email: string;
     role: string;
+    last_login_at: string;
     shift?: {
         name: string;
     };
@@ -56,6 +58,19 @@ export default function UsersPage({ users, filters }: UsersProps) {
             accessorKey: 'shift.name',
             header: 'Shift',
             cell: ({ row }) => row.original.shift?.name || '-',
+        },
+        {
+            accessorKey: 'last_login_at',
+            header: 'Last Login At',
+            cell: ({ row }) => {
+                const date = row.original.last_login_at;
+                if (date) {
+                    const d = typeof date === 'string' ? new Date(date) : date;
+                    return format(d, 'EEE dd MMM, yyyy hh:mm a');
+                    // Example: Mon 19 Aug, 2025 04:32 PM
+                }
+                return '-';
+            },
         },
     ];
 
