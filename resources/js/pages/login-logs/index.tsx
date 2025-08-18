@@ -20,7 +20,7 @@ interface LoginLog {
         id: number;
         name: string;
         email: string;
-    };
+    } | null;
     event: string;
     ip_address: string | null;
     user_agent: string | null;
@@ -35,6 +35,10 @@ interface LoginLogsProps {
         per_page: number;
         total: number;
         links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: {
+        search?: string;
+        event?: string;
     };
 }
 
@@ -74,10 +78,11 @@ const columns: ColumnDef<LoginLog>[] = [
 export default function LoginLogsPage({ logs, filters }: LoginLogsProps) {
     const { user } = usePage().props.auth;
     const [search, setSearch] = useState(filters?.search || '');
+    const [event, setEvent] = useState(filters?.event || '');
 
-    const handleSearch = (e: React.FormEvent) => {
+    const handleFilter = (e: React.FormEvent) => {
         e.preventDefault();
-        router.get(route('login-logs.index'), { search }, { preserveState: true, replace: true });
+        router.get(route('login-logs.index'), { search, event }, { preserveState: true, replace: true });
     };
 
     const table = useReactTable({
@@ -87,7 +92,7 @@ export default function LoginLogsPage({ logs, filters }: LoginLogsProps) {
     });
 
     const goToPage = (url: string | null) => {
-        if (url) router.visit(url);
+        if (url) router.visit(url, { preserveState: true });
     };
 
     return (
@@ -96,7 +101,8 @@ export default function LoginLogsPage({ logs, filters }: LoginLogsProps) {
             <div className="h-full overflow-x-auto rounded-xl p-4 pt-0">
                 <div className="mt-4 flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Login Logs</h1>
-                    <form onSubmit={handleSearch} className="flex items-center gap-2">
+                    <form onSubmit={handleFilter} className="flex items-center gap-2">
+                        {/* Search */}
                         <input
                             type="text"
                             value={search}
@@ -104,6 +110,19 @@ export default function LoginLogsPage({ logs, filters }: LoginLogsProps) {
                             placeholder="Search..."
                             className="rounded border px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                         />
+
+                        {/* Event Filter */}
+                        <select
+                            value={event}
+                            onChange={(e) => setEvent(e.target.value)}
+                            className="rounded border px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        >
+                            <option value="">All Events</option>
+                            <option value="login">Login</option>
+                            <option value="logout">Logout</option>
+                            <option value="failed_login">Failed Login</option>
+                        </select>
+
                         <Button type="submit" size="sm" variant="outline">
                             <Search className="h-4 w-4" />
                         </Button>
@@ -158,7 +177,7 @@ export default function LoginLogsPage({ logs, filters }: LoginLogsProps) {
                             Prev
                         </button>
 
-                        {/* Pages with ellipsis */}
+                        {/* Pages */}
                         {Array.from({ length: logs.last_page }, (_, i) => i + 1)
                             .filter((page) => page === 1 || page === logs.last_page || Math.abs(page - logs.current_page) <= 1)
                             .reduce<number[]>((acc, page, idx, arr) => {
